@@ -1,0 +1,31 @@
+complaint_id,date,batch_id,category,severity,description,status
+CMP-2024-0001,2024-07-18,PARA-24-0166,Labeling,low,Customer complaint regarding tablet defect,open
+CMP-2024-0002,2024-12-11,PARA-24-0106,Foreign matter,low,Customer complaint regarding foreign matter,open
+CMP-2024-0003,2024-06-02,PARA-24-0187,Tablet defect,low,Customer complaint regarding packaging,investigating
+CMP-2024-0004,2024-10-01,PARA-24-0110,Foreign matter,low,Customer complaint regarding foreign matter,investigating
+CMP-2024-0005,2024-07-24,PARA-24-0412,Efficacy,medium,Customer complaint regarding packaging,closed
+CMP-2024-0006,2024-10-23,PARA-24-0049,Labeling,low,Customer complaint regarding packaging,closed
+CMP-2024-0007,2024-09-28,PARA-24-0244,Tablet defect,low,Customer complaint regarding packaging,closed
+CMP-2024-0008,2024-06-03,PARA-24-0259,Foreign matter,low,Customer complaint regarding labeling,closed
+CMP-2024-0009,2024-07-31,PARA-24-0206,Foreign matter,medium,Customer complaint regarding tablet defect,closed
+CMP-2024-0010,2024-10-07,PARA-24-0093,Packaging,medium,Customer complaint regarding labeling,investigating
+CMP-2024-0011,2024-10-22,PARA-24-0256,Efficacy,medium,Customer complaint regarding tablet defect,open
+CMP-2024-0012,2024-11-22,PARA-24-0273,Labeling,high,Customer complaint regarding tablet defect,investigating
+CMP-2024-0013,2024-11-16,PARA-24-0031,Labeling,low,Customer complaint regarding tablet defect,open
+CMP-2024-0014,2024-03-18,PARA-24-0383,Foreign matter,high,Customer complaint regarding tablet defect,closed
+CMP-2024-0015,2024-02-02,PARA-24-0325,Efficacy,high,Customer complaint regarding foreign matter,investigating
+CMP-2024-0016,2024-11-26,PARA-24-0083,Foreign matter,medium,Customer complaint regarding efficacy,closed
+CMP-2024-0017,2024-02-28,PARA-24-0077,Efficacy,low,Customer complaint regarding foreign matter,closed
+CMP-2024-0018,2024-10-13,PARA-24-0224,Tablet defect,medium,Customer complaint regarding packaging,open
+CMP-2024-0019,2024-05-19,PARA-24-0070,Packaging,low,Customer complaint regarding foreign matter,closed
+CMP-2024-0020,2024-03-31,PARA-24-0330,Packaging,critical,Customer complaint regarding tablet defect,closed
+CMP-2024-0021,2024-01-29,PARA-24-0441,Packaging,low,Customer complaint regarding foreign matter,investigating
+CMP-2024-0022,2024-07-27,PARA-24-0460,Foreign matter,medium,Customer complaint regarding packaging,closed
+CMP-2024-0023,2024-03-12,PARA-24-0121,Packaging,medium,Customer complaint regarding labeling,investigating
+CMP-2024-0024,2024-09-24,PARA-24-0341,Labeling,high,Customer complaint regarding labeling,open
+CMP-2024-0025,2024-02-16,PARA-24-0122,Labeling,low,Customer complaint regarding foreign matter,closed
+CMP-2024-0026,2024-10-26,PARA-24-0378,Tablet defect,high,Customer complaint regarding efficacy,investigating
+CMP-2024-0027,2024-04-21,PARA-24-0074,Packaging,low,Customer complaint regarding foreign matter,closed
+CMP-2024-0028,2024-05-10,PARA-24-0442,Labeling,low,Customer complaint regarding labeling,closed
+CMP-2024-0029,2024-02-27,PARA-24-0163,Labeling,low,Customer complaint regarding efficacy,investigating
+CMP-2024-0030,2024-03-15,PARA-24-0186,Tablet defect,medium,Customer complaint regarding foreign matter,open
