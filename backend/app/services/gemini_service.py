@@ -33,38 +33,38 @@ def get_data_context(db: Session) -> str:
     avg_hardness = db.query(func.avg(models.Batch.hardness)).scalar() or 0
 
     context = f"""
-=== DONNÉES DE L'USINE PHARMACEUTIQUE - PARACETAMOL 500mg ===
-Période analysée: 2020-2025 (6 ans de données APR)
+=== PHARMACEUTICAL PLANT DATA - PARACETAMOL 500mg ===
+Analysis Period: 2020-2025 (6 years of APR data)
 
-📊 STATISTIQUES GLOBALES:
-- Total lots produits: {total_batches:,}
-- Rendement moyen: {avg_yield:.1f}%
-- Dureté moyenne: {avg_hardness:.1f} kp
-- Plaintes clients: {len(complaints)} ({len([c for c in complaints if c.status == 'open'])} ouvertes)
-- CAPAs: {len(capas)} ({len([c for c in capas if c.status == 'open'])} ouvertes)
+GLOBAL STATISTICS:
+- Total batches produced: {total_batches:,}
+- Average yield: {avg_yield:.1f}%
+- Average hardness: {avg_hardness:.1f} kp
+- Customer complaints: {len(complaints)} ({len([c for c in complaints if c.status == 'open'])} open)
+- CAPAs: {len(capas)} ({len([c for c in capas if c.status == 'open'])} open)
 
-📦 LOTS RÉCENTS (derniers {len(batches)}):
+RECENT BATCHES (last {len(batches)}):
 """
     for b in batches[:15]:
         date_str = (
             b.manufacturing_date.strftime("%Y-%m-%d") if b.manufacturing_date else "N/A"
         )
-        context += f"- {b.batch_id}: {date_str}, Press: {b.tablet_press_id or 'N/A'}, Dureté: {b.hardness or 0:.1f}kp, Rendement: {b.yield_percent or 0:.1f}%\n"
+        context += f"- {b.batch_id}: {date_str}, Press: {b.tablet_press_id or 'N/A'}, Hardness: {b.hardness or 0:.1f}kp, Yield: {b.yield_percent or 0:.1f}%\n"
 
     if qc_results:
-        context += f"\n🔬 RÉSULTATS QC RÉCENTS ({len(qc_results)} tests):\n"
+        context += f"\nRECENT QC RESULTS ({len(qc_results)} tests):\n"
         for qc in qc_results[:15]:
-            context += f"- {qc.batch_id}: Essai={qc.assay_percent or 0:.1f}%, Dissolution={qc.dissolution_mean or 0:.1f}%, Résultat: {qc.overall_result}\n"
+            context += f"- {qc.batch_id}: Assay={qc.assay_percent or 0:.1f}%, Dissolution={qc.dissolution_mean or 0:.1f}%, Result: {qc.overall_result}\n"
 
     if complaints:
-        context += f"\n📞 PLAINTES CLIENTS ({len(complaints)} total):\n"
+        context += f"\nCUSTOMER COMPLAINTS ({len(complaints)} total):\n"
         open_complaints = [
             c for c in complaints if c.status and c.status.lower() == "open"
         ]
-        context += f"   Ouvertes: {len(open_complaints)}\n"
+        context += f"   Open: {len(open_complaints)}\n"
         by_category = {}
         for c in complaints:
-            cat = c.category or "Autre"
+            cat = c.category or "Other"
             by_category[cat] = by_category.get(cat, 0) + 1
         for cat, count in sorted(by_category.items(), key=lambda x: -x[1])[:5]:
             context += f"   - {cat}: {count}\n"
@@ -72,58 +72,58 @@ Période analysée: 2020-2025 (6 ans de données APR)
         for c in complaints:
             sev = c.severity or "Unknown"
             by_severity[sev] = by_severity.get(sev, 0) + 1
-        context += f"   Par sévérité: {by_severity}\n"
+        context += f"   By severity: {by_severity}\n"
 
     if capas:
-        context += f"\n🔧 CAPAS ({len(capas)} total):\n"
+        context += f"\nCAPAS ({len(capas)} total):\n"
         open_capas = [c for c in capas if c.status and "closed" not in c.status.lower()]
-        context += f"   Ouvertes: {len(open_capas)}\n"
+        context += f"   Open: {len(open_capas)}\n"
         by_source = {}
         for c in capas:
-            src = c.source or "Autre"
+            src = c.source or "Other"
             by_source[src] = by_source.get(src, 0) + 1
         for src, count in sorted(by_source.items(), key=lambda x: -x[1])[:5]:
             context += f"   - Source {src}: {count}\n"
         critical = [c for c in capas if c.risk_score == "Critical"]
-        context += f"   CAPAs critiques: {len(critical)}\n"
+        context += f"   Critical CAPAs: {len(critical)}\n"
 
     if equipment:
-        context += f"\n⚙️ ÉQUIPEMENTS (calibrations récentes):\n"
+        context += f"\nEQUIPMENT (recent calibrations):\n"
         failures = [e for e in equipment if e.result == "Fail"]
-        context += f"   Échecs de calibration: {len(failures)}\n"
+        context += f"   Calibration failures: {len(failures)}\n"
         by_type = {}
         for e in equipment:
-            t = e.equipment_type or "Autre"
+            t = e.equipment_type or "Other"
             by_type[t] = by_type.get(t, 0) + 1
-        context += f"   Par type: {by_type}\n"
+        context += f"   By type: {by_type}\n"
 
     return context
 
 
-SYSTEM_PROMPT = """Tu es NYOS, un assistant IA expert en qualité pharmaceutique et analyse APR (Annual Product Review).
-Tu analyses les données de production de comprimés de Paracetamol 500mg sur une période de 6 ans (2020-2025).
+SYSTEM_PROMPT = """You are NYOS, an AI assistant expert in pharmaceutical quality and APR (Annual Product Review) analysis.
+You analyze production data for Paracetamol 500mg tablets over a 6-year period (2020-2025).
 
-Ton rôle:
-1. Détecter les tendances et dérives dans les données de production
-2. Identifier les anomalies, signaux faibles et problèmes potentiels
-3. Analyser les corrélations entre équipements, lots, et résultats qualité
-4. Résumer clairement la situation qualité de l'usine
-5. Recommander des actions correctives et préventives
+Your role:
+1. Detect trends and drifts in production data
+2. Identify anomalies, weak signals, and potential issues
+3. Analyze correlations between equipment, batches, and quality results
+4. Clearly summarize the plant's quality situation
+5. Recommend corrective and preventive actions
 
-Scénarios cachés à détecter:
-- 2020: Impact COVID-19 sur production
-- 2021: Dégradation Press-A (Sept-Nov)
-- 2022: Problème fournisseur excipient MCC (Juin)
-- 2023: Transition méthode analytique (Q2)
-- 2024: Effet température saisonnière (Juil-Août)
-- 2025: Dérive Press-B + Nouveau fournisseur API (Nov)
+Hidden scenarios to detect:
+- 2020: COVID-19 impact on production
+- 2021: Press-A degradation (Sept-Nov)
+- 2022: Excipient supplier issue MCC (June)
+- 2023: Analytical method transition (Q2)
+- 2024: Seasonal temperature effect (Jul-Aug)
+- 2025: Press-B drift + New API supplier (Nov)
 
-Règles:
-- Sois précis avec des données chiffrées
-- Signale tout problème potentiel
-- Réponds en français
-- Utilise des bullet points et formatage markdown
-- Cite les lots, dates et valeurs spécifiques quand pertinent
+Rules:
+- Be precise with numerical data
+- Flag any potential issues
+- Respond in English
+- Use bullet points and markdown formatting
+- Cite specific batches, dates, and values when relevant
 """
 
 
@@ -134,25 +134,25 @@ async def chat_with_gemini(message: str, db: Session) -> str:
 
         full_prompt = f"""{SYSTEM_PROMPT}
 
-CONTEXTE DES DONNÉES:
+DATA CONTEXT:
 {context}
 
-QUESTION DE L'UTILISATEUR:
+USER QUESTION:
 {message}
 
-RÉPONSE:"""
+RESPONSE:"""
 
         response = model.generate_content(full_prompt)
         return response.text
     except Exception as e:
-        return f"Erreur de connexion à Gemini: {str(e)}. Vérifiez votre clé API."
+        return f"Gemini connection error: {str(e)}. Check your API key."
 
 
 async def analyze_trends(db: Session, parameter: str = "hardness", days: int = 30):
     batches = db.query(models.Batch).order_by(models.Batch.manufacturing_date).all()
 
     if not batches:
-        return {"error": "Pas assez de données", "dates": [], "values": []}
+        return {"error": "Not enough data", "dates": [], "values": []}
 
     max_date = max(b.manufacturing_date for b in batches if b.manufacturing_date)
     cutoff = max_date - timedelta(days=days)
@@ -163,7 +163,7 @@ async def analyze_trends(db: Session, parameter: str = "hardness", days: int = 3
 
     if len(filtered) < 2:
         return {
-            "error": "Pas assez de données pour cette période",
+            "error": "Not enough data for this period",
             "dates": [],
             "values": [],
         }
@@ -180,7 +180,7 @@ async def analyze_trends(db: Session, parameter: str = "hardness", days: int = 3
     ]
 
     if len(values) < 2:
-        return {"error": "Pas assez de données", "dates": [], "values": []}
+        return {"error": "Not enough data", "dates": [], "values": []}
 
     trend = "stable"
     alert = False
@@ -191,10 +191,10 @@ async def analyze_trends(db: Session, parameter: str = "hardness", days: int = 3
         change = ((last_avg - first_avg) / first_avg) * 100 if first_avg else 0
 
         if change > 5:
-            trend = "hausse"
+            trend = "up"
             alert = True
         elif change < -5:
-            trend = "baisse"
+            trend = "down"
             alert = True
 
     return {
@@ -300,31 +300,31 @@ async def generate_summary_stream(db: Session):
 
         prompt = f"""{SYSTEM_PROMPT}
 
-CONTEXTE DES DONNÉES:
+DATA CONTEXT:
 {context}
 
-STATISTIQUES:
-- Total lots: {stats['total_batches']}
-- Dureté moyenne: {stats['avg_hardness']}N
-- Rendement moyen: {stats['avg_yield']}%
-- Taux de conformité QC: {stats['qc_pass_rate']}%
-- Plaintes ouvertes: {stats['complaints_open']}
-- CAPAs ouvertes: {stats['capas_open']}
-- Équipements à calibrer: {stats['equipment_due']}
-- Plaintes par catégorie: {stats['complaints_by_category']}
-- Performance par machine: {stats['machines']}
+STATISTICS:
+- Total batches: {stats['total_batches']}
+- Average hardness: {stats['avg_hardness']}N
+- Average yield: {stats['avg_yield']}%
+- QC compliance rate: {stats['qc_pass_rate']}%
+- Open complaints: {stats['complaints_open']}
+- Open CAPAs: {stats['capas_open']}
+- Equipment requiring calibration: {stats['equipment_due']}
+- Complaints by category: {stats['complaints_by_category']}
+- Performance by machine: {stats['machines']}
 
-Génère un résumé exécutif détaillé de l'état de l'usine.
-Structure ta réponse avec:
-1. **État Général** - (🟢 Bon / 🟡 Attention / 🔴 Critique)
-2. **Performance Production** - rendement, volumes
-3. **Qualité** - résultats QC, tendances
-4. **Problèmes Détectés** - plaintes, CAPAs, anomalies
-5. **Recommandations** - actions prioritaires
+Generate a detailed executive summary of the plant status.
+Structure your response with:
+1. **Overall Status** - (Good / Warning / Critical)
+2. **Production Performance** - yield, volumes
+3. **Quality** - QC results, trends
+4. **Issues Detected** - complaints, CAPAs, anomalies
+5. **Recommendations** - priority actions
 
-Utilise des bullet points et du texte en **gras** pour les points importants.
+Use bullet points and **bold** text for important points.
 
-RÉSUMÉ:"""
+SUMMARY:"""
 
         response = model.generate_content(prompt, stream=True)
         for chunk in response:
@@ -341,66 +341,66 @@ async def generate_report(db: Session) -> str:
         stats = get_full_stats(db)
         model = genai.GenerativeModel("gemini-2.5-flash")
 
-        prompt = f"""Tu es un expert en qualité pharmaceutique. Génère un rapport APR (Annual Product Review) complet et professionnel.
+        prompt = f"""You are a pharmaceutical quality expert. Generate a complete and professional APR (Annual Product Review) report.
 
-DONNÉES DE L'USINE:
+PLANT DATA:
 {context}
 
-STATISTIQUES:
-- Total lots produits: {stats['total_batches']}
-- Dureté moyenne: {stats['avg_hardness']}N
-- Rendement moyen: {stats['avg_yield']}%
-- Taux de conformité QC: {stats['qc_pass_rate']}%
-- Plaintes ouvertes: {stats['complaints_open']}
-- CAPAs ouvertes: {stats['capas_open']}
-- Équipements à calibrer: {stats['equipment_due']}
-- Plaintes par catégorie: {stats['complaints_by_category']}
-- Performance par machine: {stats['machines']}
+STATISTICS:
+- Total batches produced: {stats['total_batches']}
+- Average hardness: {stats['avg_hardness']}N
+- Average yield: {stats['avg_yield']}%
+- QC compliance rate: {stats['qc_pass_rate']}%
+- Open complaints: {stats['complaints_open']}
+- Open CAPAs: {stats['capas_open']}
+- Equipment requiring calibration: {stats['equipment_due']}
+- Complaints by category: {stats['complaints_by_category']}
+- Performance by machine: {stats['machines']}
 
-Génère un rapport complet avec ces sections:
+Generate a complete report with these sections:
 
-# RAPPORT ANNUEL DE REVUE PRODUIT (APR)
-## Paracetamol 500mg - Année 2024
+# ANNUAL PRODUCT REVIEW REPORT (APR)
+## Paracetamol 500mg - Year 2024
 
-### 1. RÉSUMÉ EXÉCUTIF
-(État général, conclusions clés)
+### 1. EXECUTIVE SUMMARY
+(Overall status, key conclusions)
 
-### 2. PERFORMANCE DE PRODUCTION
-- Volumes produits
-- Rendements par période et par machine
-- Analyse des tendances
+### 2. PRODUCTION PERFORMANCE
+- Volumes produced
+- Yields by period and machine
+- Trend analysis
 
-### 3. CONTRÔLE QUALITÉ
-- Résultats des tests (dissolution, essai, dureté, friabilité)
-- Taux de conformité
-- Non-conformités détectées
+### 3. QUALITY CONTROL
+- Test results (dissolution, assay, hardness, friability)
+- Compliance rate
+- Non-conformities detected
 
-### 4. PLAINTES ET RÉCLAMATIONS
-- Analyse par catégorie
-- Tendances
-- Actions correctives
+### 4. COMPLAINTS AND CLAIMS
+- Analysis by category
+- Trends
+- Corrective actions
 
-### 5. ACTIONS CORRECTIVES ET PRÉVENTIVES (CAPA)
-- CAPAs initiées
-- Statut de clôture
-- Efficacité
+### 5. CORRECTIVE AND PREVENTIVE ACTIONS (CAPA)
+- CAPAs initiated
+- Closure status
+- Effectiveness
 
-### 6. ÉQUIPEMENTS
-- État de calibration
-- Maintenance préventive
+### 6. EQUIPMENT
+- Calibration status
+- Preventive maintenance
 
-### 7. ANALYSE DES TENDANCES
-- Dérives identifiées
-- Signaux faibles
-- Comparaison avec période précédente
+### 7. TREND ANALYSIS
+- Identified drifts
+- Weak signals
+- Comparison with previous period
 
-### 8. CONCLUSIONS ET RECOMMANDATIONS
-- Décision de maintien/modification du procédé
-- Actions prioritaires pour l'année suivante
+### 8. CONCLUSIONS AND RECOMMENDATIONS
+- Decision to maintain/modify process
+- Priority actions for the following year
 
-Sois précis, utilise les données chiffrées, et formate proprement en Markdown."""
+Be precise, use numerical data, and format properly in Markdown."""
 
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Erreur lors de la génération du rapport: {str(e)}"
+        return f"Error generating report: {str(e)}"

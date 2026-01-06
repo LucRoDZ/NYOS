@@ -34,9 +34,9 @@ function QualityGauge({ score }) {
   
   const getLabel = (s) => {
     if (s >= 90) return 'Excellent';
-    if (s >= 75) return 'Bon';
-    if (s >= 50) return 'À surveiller';
-    return 'Critique';
+    if (s >= 75) return 'Good';
+    if (s >= 50) return 'Needs Attention';
+    return 'Critical';
   };
 
   const color = getColor(score);
@@ -107,7 +107,7 @@ function KPICard({ icon: Icon, label, value, trend, trendValue, color = 'blue', 
 // Drift Alert Card
 function DriftCard({ drift }) {
   const isAlert = drift.alert;
-  const Icon = drift.direction === 'hausse' ? TrendingUp : TrendingDown;
+  const Icon = drift.direction === 'up' ? TrendingUp : TrendingDown;
   
   return (
     <div className={`p-4 rounded-lg border ${isAlert ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200'}`}>
@@ -132,7 +132,7 @@ function DriftCard({ drift }) {
       </div>
       {drift.equipment_drifts?.length > 0 && (
         <div className="mt-3 pt-3 border-t border-yellow-200">
-          <p className="text-xs text-yellow-700 mb-1">Équipements concernés:</p>
+          <p className="text-xs text-yellow-700 mb-1">Affected equipment:</p>
           {drift.equipment_drifts.map((eq, i) => (
             <span key={i} className="inline-block bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded mr-1">
               {eq.equipment}: {eq.change > 0 ? '+' : ''}{eq.change}
@@ -211,7 +211,7 @@ export default function Dashboard() {
     api.streamSummary(
       (text) => setSummary(prev => prev + text),
       () => setSummaryLoading(false),
-      (error) => { setSummary("Erreur: " + error); setSummaryLoading(false); }
+      (error) => { setSummary("Error: " + error); setSummaryLoading(false); }
     );
   }
 
@@ -221,7 +221,7 @@ export default function Dashboard() {
       const data = await api.getReport();
       setReport(data.report);
       setShowReport(true);
-    } catch (e) { setReport("Erreur lors de la génération."); }
+    } catch (e) { setReport("Error generating report."); }
     finally { setReportLoading(false); }
   }
 
@@ -230,14 +230,14 @@ export default function Dashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'rapport_apr_nyos.md';
+    a.download = 'apr_report_nyos.md';
     a.click();
     URL.revokeObjectURL(url);
   }
 
   function printReport() {
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<html><head><title>Rapport APR NYOS</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1,h2,h3,h4{color:#1e40af}ul{margin-left:20px}</style></head><body>${parseMarkdown(report)}</body></html>`);
+    printWindow.document.write(`<html><head><title>NYOS APR Report</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}h1,h2,h3,h4{color:#1e40af}ul{margin-left:20px}</style></head><body>${parseMarkdown(report)}</body></html>`);
     printWindow.document.close();
     printWindow.print();
   }
@@ -247,7 +247,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Chargement des analyses...</p>
+          <p className="text-gray-500">Loading analytics...</p>
         </div>
       </div>
     );
@@ -257,12 +257,12 @@ export default function Dashboard() {
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
         <AlertTriangle className="mx-auto text-yellow-500 mb-4" size={56} />
-        <h3 className="font-semibold text-yellow-800 text-xl mb-2">Aucune donnée disponible</h3>
+        <h3 className="font-semibold text-yellow-800 text-xl mb-2">No data available</h3>
         <p className="text-yellow-600 mb-4">
-          Importez des données via l'onglet "Import Data" pour commencer l'analyse.
+          Import data via the "Import Data" tab to start the analysis.
         </p>
         <p className="text-sm text-yellow-500">
-          Utilisez les fichiers CSV générés dans le dossier apr_data/
+          Use CSV files generated in the apr_data/ folder
         </p>
       </div>
     );
@@ -275,19 +275,19 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard Qualité</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Quality Dashboard</h2>
           <p className="text-sm text-gray-500">
-            Période: {analytics?.period?.start?.slice(0,10)} → {analytics?.period?.end?.slice(0,10)} ({analytics?.period?.years} ans)
+            Period: {analytics?.period?.start?.slice(0,10)} - {analytics?.period?.end?.slice(0,10)} ({analytics?.period?.years} years)
           </p>
         </div>
         <div className="flex gap-2">
           <button onClick={generateSummary} disabled={summaryLoading} className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
             {summaryLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Zap size={18} />}
-            Résumé IA
+            AI Summary
           </button>
           <button onClick={generateReport} disabled={reportLoading} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors">
             {reportLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <FileText size={18} />}
-            Rapport APR
+            APR Report
           </button>
         </div>
       </div>
@@ -299,9 +299,9 @@ export default function Dashboard() {
             <AlertCircle className="text-red-600" size={24} />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-red-800">Attention: {criticalIssues} problème(s) critique(s)</p>
+            <p className="font-semibold text-red-800">Warning: {criticalIssues} critical issue(s)</p>
             <p className="text-sm text-red-600">
-              {anomalies?.critical || 0} anomalies critiques, {analytics?.compliance?.overdue_capas || 0} CAPAs en retard
+              {anomalies?.critical || 0} critical anomalies, {analytics?.compliance?.overdue_capas || 0} overdue CAPAs
             </p>
           </div>
         </div>
@@ -312,20 +312,20 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-200 rounded-xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-primary-900 flex items-center gap-2">
-              <Zap size={20} className="text-primary-600" /> Résumé Exécutif IA
+              <Zap size={20} className="text-primary-600" /> AI Executive Summary
             </h3>
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => setSummaryMinimized(!summaryMinimized)} 
                 className="p-1.5 hover:bg-primary-100 rounded-lg transition-colors text-primary-600"
-                title={summaryMinimized ? "Développer" : "Réduire"}
+                title={summaryMinimized ? "Expand" : "Minimize"}
               >
                 {summaryMinimized ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
               </button>
               <button 
                 onClick={() => setSummary('')} 
                 className="p-1.5 hover:bg-red-100 rounded-lg transition-colors text-red-500"
-                title="Fermer"
+                title="Close"
               >
                 <X size={20} />
               </button>
@@ -335,7 +335,7 @@ export default function Dashboard() {
             <div className="text-gray-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: parseMarkdown(summary) }} />
           )}
           {summaryMinimized && (
-            <p className="text-sm text-gray-500 italic">Cliquez sur ↓ pour développer le résumé</p>
+            <p className="text-sm text-gray-500 italic">Click to expand the summary</p>
           )}
         </div>
       )}
@@ -344,7 +344,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Quality Score */}
         <div className="bg-white rounded-xl p-6 border border-gray-200 flex flex-col items-center justify-center">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">Score Qualité Global</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-4">Overall Quality Score</h3>
           <QualityGauge score={analytics?.quality?.quality_score || 0} />
         </div>
 
@@ -352,14 +352,14 @@ export default function Dashboard() {
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-4">
           <KPICard 
             icon={Factory} 
-            label="Lots Produits" 
+            label="Batches Produced" 
             value={analytics?.production?.total_batches?.toLocaleString() || 0}
-            subtext={`${analytics?.production?.recent_batches || 0} ce mois`}
+            subtext={`${analytics?.production?.recent_batches || 0} this month`}
             color="blue"
           />
           <KPICard 
             icon={Target} 
-            label="Rendement Moyen" 
+            label="Average Yield" 
             value={`${analytics?.production?.avg_yield || 0}%`}
             trend={analytics?.production?.recent_yield > analytics?.production?.avg_yield ? 'up' : 'down'}
             trendValue={((analytics?.production?.recent_yield - analytics?.production?.avg_yield) || 0).toFixed(1)}
@@ -367,22 +367,22 @@ export default function Dashboard() {
           />
           <KPICard 
             icon={CheckCircle} 
-            label="Taux QC Pass" 
+            label="QC Pass Rate" 
             value={`${analytics?.quality?.pass_rate || 0}%`}
             color={analytics?.quality?.pass_rate >= 99 ? 'green' : 'yellow'}
           />
           <KPICard 
             icon={AlertTriangle} 
-            label="Plaintes Ouvertes" 
+            label="Open Complaints" 
             value={analytics?.compliance?.open_complaints || 0}
-            subtext={`${analytics?.compliance?.critical_complaints || 0} critiques`}
+            subtext={`${analytics?.compliance?.critical_complaints || 0} critical`}
             color={analytics?.compliance?.open_complaints > 5 ? 'red' : 'yellow'}
           />
           <KPICard 
             icon={FileWarning} 
-            label="CAPAs Ouvertes" 
+            label="Open CAPAs" 
             value={analytics?.compliance?.open_capas || 0}
-            subtext={`${analytics?.compliance?.overdue_capas || 0} en retard`}
+            subtext={`${analytics?.compliance?.overdue_capas || 0} overdue`}
             color={analytics?.compliance?.overdue_capas > 0 ? 'red' : 'yellow'}
           />
           <KPICard 
@@ -399,14 +399,14 @@ export default function Dashboard() {
         {/* Yearly Trends */}
         {yearly?.years?.length > 0 && (
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Évolution Annuelle du Rendement</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Annual Yield Evolution</h3>
             <ResponsiveContainer width="100%" height={250}>
               <AreaChart data={yearly.years}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="year" stroke="#6b7280" fontSize={12} />
                 <YAxis stroke="#6b7280" fontSize={12} domain={[90, 100]} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                <Area type="monotone" dataKey="avg_yield" name="Rendement %" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
+                <Area type="monotone" dataKey="avg_yield" name="Yield %" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -415,14 +415,14 @@ export default function Dashboard() {
         {/* Complaints by Year */}
         {yearly?.years?.length > 0 && (
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Plaintes par Année</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Complaints by Year</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={yearly.years}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="year" stroke="#6b7280" fontSize={12} />
                 <YAxis stroke="#6b7280" fontSize={12} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                <Bar dataKey="complaints" name="Plaintes" fill="#f97316" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="complaints" name="Complaints" fill="#f97316" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -434,10 +434,10 @@ export default function Dashboard() {
         {/* Drift Detection */}
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Détection de Dérives</h3>
+            <h3 className="font-semibold text-gray-900">Drift Detection</h3>
             {drifts?.total_alerts > 0 && (
               <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-sm">
-                {drifts.total_alerts} alerte(s)
+                {drifts.total_alerts} alert(s)
               </span>
             )}
           </div>
@@ -447,7 +447,7 @@ export default function Dashboard() {
               <DriftCard key={i} drift={drift} />
             ))}
             {(!drifts?.drifts || drifts.drifts.length === 0) && (
-              <p className="text-gray-400 text-center py-4">Aucune dérive significative détectée</p>
+              <p className="text-gray-400 text-center py-4">No significant drift detected</p>
             )}
           </div>
         </div>
@@ -455,11 +455,11 @@ export default function Dashboard() {
         {/* Recent Anomalies */}
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Anomalies Récentes</h3>
+            <h3 className="font-semibold text-gray-900">Recent Anomalies</h3>
             <span className={`px-2 py-1 rounded-full text-sm ${
               anomalies?.critical > 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
             }`}>
-              {anomalies?.total || 0} détectées
+              {anomalies?.total || 0} detected
             </span>
           </div>
           <p className="text-sm text-gray-500 mb-4">{anomalies?.period}</p>
@@ -468,7 +468,7 @@ export default function Dashboard() {
               <AnomalyItem key={i} anomaly={a} />
             ))}
             {(!anomalies?.anomalies || anomalies.anomalies.length === 0) && (
-              <p className="text-gray-400 text-center py-4">Aucune anomalie récente</p>
+              <p className="text-gray-400 text-center py-4">No recent anomalies</p>
             )}
           </div>
         </div>
@@ -479,11 +479,11 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Truck size={20} /> Performance Fournisseurs
+              <Truck size={20} /> Supplier Performance
             </h3>
             {suppliers.at_risk > 0 && (
               <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-sm">
-                {suppliers.at_risk} à risque
+                {suppliers.at_risk} at risk
               </span>
             )}
           </div>
@@ -491,12 +491,12 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-2 font-medium text-gray-500">Fournisseur</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Livraisons</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Approuvés</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Rejetés</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Taux</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Statut</th>
+                  <th className="text-left py-2 font-medium text-gray-500">Supplier</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Deliveries</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Approved</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Rejected</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Rate</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -513,7 +513,7 @@ export default function Dashboard() {
                         s.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-red-100 text-red-700'
                       }`}>
-                        {s.status === 'good' ? 'OK' : s.status === 'warning' ? 'Attention' : 'Critique'}
+                        {s.status === 'good' ? 'OK' : s.status === 'warning' ? 'Warning' : 'Critical'}
                       </span>
                     </td>
                   </tr>
@@ -529,7 +529,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-bold text-lg">Rapport APR Complet</h3>
+              <h3 className="font-bold text-lg">Full APR Report</h3>
               <div className="flex gap-2">
                 <button onClick={downloadReport} className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">
                   <Download size={16} /> .md
@@ -537,7 +537,7 @@ export default function Dashboard() {
                 <button onClick={printReport} className="flex items-center gap-1 px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700">
                   <FileText size={16} /> PDF
                 </button>
-                <button onClick={() => setShowReport(false)} className="px-3 py-1 text-gray-500 hover:bg-gray-100 rounded">✕</button>
+                <button onClick={() => setShowReport(false)} className="px-3 py-1 text-gray-500 hover:bg-gray-100 rounded">X</button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-6 prose max-w-none" dangerouslySetInnerHTML={{ __html: parseMarkdown(report) }} />

@@ -73,18 +73,18 @@ export default function Chat() {
       setMessages(prev => [...prev, { role: 'assistant', content: response.response }]);
       loadConversations();
     } catch (e) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Erreur de connexion." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Connection error." }]);
     } finally { setLoading(false); }
   }
 
-  const suggestions = ["Quel est l'état général ?", "Tendances inquiétantes ?", "Plaintes clients", "Performance Press-A"];
+  const suggestions = ["What is the overall status?", "Concerning trends?", "Customer complaints", "Press-A performance"];
 
   return (
     <div className="flex h-[calc(100vh-180px)] gap-4">
       <div className="w-64 bg-white rounded-xl border border-gray-200 flex flex-col">
         <div className="p-3 border-b border-gray-200">
           <button onClick={createNewConversation} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
-            <Plus size={18} /> Nouvelle conversation
+            <Plus size={18} /> New conversation
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -97,7 +97,7 @@ export default function Chat() {
               </button>
             </div>
           ))}
-          {conversations.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Aucune conversation</p>}
+          {conversations.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No conversations</p>}
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export default function Chat() {
           {messages.length === 0 && (
             <div className="text-center py-8">
               <Bot className="mx-auto text-gray-300 mb-4" size={64} />
-              <p className="text-gray-500 mb-6">Commencez par poser une question</p>
+              <p className="text-gray-500 mb-6">Start by asking a question</p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {suggestions.map((s, i) => (<button key={i} onClick={() => setInput(s)} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">{s}</button>))}
               </div>
@@ -130,7 +130,7 @@ export default function Chat() {
         </div>
         <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200">
           <div className="flex gap-2">
-            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Posez une question..." className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" disabled={loading} />
+            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a question..." className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" disabled={loading} />
             <button type="submit" disabled={loading || !input.trim()} className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"><Send size={20} /></button>
           </div>
         </form>

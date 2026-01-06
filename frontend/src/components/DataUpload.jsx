@@ -3,15 +3,15 @@ import { Upload, FileText, CheckCircle, AlertCircle, Clock, Download } from 'luc
 import { api } from '../api';
 
 const dataTypes = [
-  { id: 'batch', label: 'Lots de production', description: 'manufacturing_extended_*.csv' },
-  { id: 'qc', label: 'Résultats QC', description: 'qc_lab_extended_*.csv' },
-  { id: 'complaint', label: 'Plaintes clients', description: 'customer_complaints_*.csv' },
+  { id: 'batch', label: 'Production Batches', description: 'manufacturing_extended_*.csv' },
+  { id: 'qc', label: 'QC Results', description: 'qc_lab_extended_*.csv' },
+  { id: 'complaint', label: 'Customer Complaints', description: 'customer_complaints_*.csv' },
   { id: 'capa', label: 'CAPAs', description: 'capa_records_*.csv' },
-  { id: 'equipment', label: 'Équipements', description: 'equipment_calibration_*.csv' },
-  { id: 'environmental', label: 'Environnement', description: 'environmental_monitoring_*.csv' },
-  { id: 'stability', label: 'Stabilité', description: 'stability_data_*.csv' },
-  { id: 'raw_material', label: 'Matières premières', description: 'raw_materials_*.csv' },
-  { id: 'batch_release', label: 'Libération lots', description: 'batch_release_*.csv' },
+  { id: 'equipment', label: 'Equipment', description: 'equipment_calibration_*.csv' },
+  { id: 'environmental', label: 'Environmental', description: 'environmental_monitoring_*.csv' },
+  { id: 'stability', label: 'Stability', description: 'stability_data_*.csv' },
+  { id: 'raw_material', label: 'Raw Materials', description: 'raw_materials_*.csv' },
+  { id: 'batch_release', label: 'Batch Release', description: 'batch_release_*.csv' },
 ];
 
 export default function DataUpload() {
@@ -36,7 +36,7 @@ export default function DataUpload() {
 
   async function handleFile(file) {
     if (!file.name.endsWith('.csv')) {
-      setUploadResult({ error: 'Seuls les fichiers CSV sont acceptés' });
+      setUploadResult({ error: 'Only CSV files are accepted' });
       return;
     }
 
@@ -48,7 +48,7 @@ export default function DataUpload() {
       setUploadResult({ success: true, ...result });
       loadUploads();
     } catch (e) {
-      setUploadResult({ error: 'Erreur lors de l\'upload' });
+      setUploadResult({ error: 'Error during upload' });
     } finally {
       setUploading(false);
     }
@@ -70,12 +70,12 @@ export default function DataUpload() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Import de Données</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Data Import</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Type de données</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Data Type</h3>
             <div className="grid grid-cols-2 gap-3">
               {dataTypes.map(type => (
                 <button
@@ -104,11 +104,11 @@ export default function DataUpload() {
           >
             <Upload className={`mx-auto mb-4 ${dragActive ? 'text-primary-500' : 'text-gray-400'}`} size={48} />
             <p className="text-gray-600 mb-2">
-              Glissez votre fichier CSV ici ou
+              Drag your CSV file here or
             </p>
             <label className="inline-block">
               <span className="px-4 py-2 bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700">
-                Parcourir
+                Browse
               </span>
               <input
                 type="file"
@@ -118,13 +118,13 @@ export default function DataUpload() {
                 disabled={uploading}
               />
             </label>
-            <p className="text-xs text-gray-400 mt-4">Format: CSV uniquement</p>
+            <p className="text-xs text-gray-400 mt-4">Format: CSV only</p>
           </div>
 
           {uploading && (
             <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
-              <p className="text-primary-700">Import en cours...</p>
+              <p className="text-primary-700">Import in progress...</p>
             </div>
           )}
 
@@ -132,9 +132,9 @@ export default function DataUpload() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
               <CheckCircle className="text-green-500" size={24} />
               <div>
-                <p className="font-semibold text-green-800">Import réussi</p>
+                <p className="font-semibold text-green-800">Import successful</p>
                 <p className="text-green-600 text-sm">
-                  {uploadResult.records_imported} enregistrements importés depuis {uploadResult.filename}
+                  {uploadResult.records_imported} records imported from {uploadResult.filename}
                 </p>
               </div>
             </div>
@@ -151,10 +151,10 @@ export default function DataUpload() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Clock size={18} />
-            Historique des imports
+            Import History
           </h3>
           {uploads.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Aucun fichier importé</p>
+            <p className="text-gray-500 text-center py-8">No files imported</p>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {uploads.map((upload, i) => (
@@ -163,11 +163,11 @@ export default function DataUpload() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 truncate">{upload.filename}</p>
                     <p className="text-xs text-gray-500">
-                      {upload.records_count} enregistrements • {upload.data_type}
+                      {upload.records_count} records - {upload.data_type}
                     </p>
                   </div>
                   <span className="text-xs text-gray-400">
-                    {new Date(upload.uploaded_at).toLocaleDateString('fr-FR')}
+                    {new Date(upload.uploaded_at).toLocaleDateString('en-US')}
                   </span>
                 </div>
               ))}

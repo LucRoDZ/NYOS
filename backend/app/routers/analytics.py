@@ -1,7 +1,3 @@
-"""
-Analytics Router - Advanced data analysis endpoints
-"""
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case, extract
@@ -204,15 +200,15 @@ async def detect_drifts(db: Session = Depends(get_db), window_days: int = 90):
 
     # Parameters to check for drift
     params = [
-        ("hardness", models.Batch.hardness, "Dureté (kp)", 5),
-        ("yield_percent", models.Batch.yield_percent, "Rendement (%)", 2),
+        ("hardness", models.Batch.hardness, "Hardness (kp)", 5),
+        ("yield_percent", models.Batch.yield_percent, "Yield (%)", 2),
         (
             "compression_force",
             models.Batch.compression_force,
-            "Force compression (kN)",
+            "Compression Force (kN)",
             2,
         ),
-        ("weight", models.Batch.weight, "Poids (mg)", 5),
+        ("weight", models.Batch.weight, "Weight (mg)", 5),
     ]
 
     for param_id, column, label, threshold in params:
@@ -509,7 +505,7 @@ async def detect_anomalies(db: Session = Depends(get_db), days: int = 30):
                     else None
                 ),
                 "value": batch.yield_percent,
-                "message": f"Rendement bas: {batch.yield_percent}%",
+                "message": f"Low yield: {batch.yield_percent}%",
                 "equipment": batch.tablet_press_id,
             }
         )
@@ -531,23 +527,23 @@ async def detect_anomalies(db: Session = Depends(get_db), days: int = 30):
 
         # Assay check (95-105%)
         if qc.assay_percent and (qc.assay_percent < 95 or qc.assay_percent > 105):
-            issues.append(f"Assay hors spec: {qc.assay_percent:.1f}%")
+            issues.append(f"Assay out of spec: {qc.assay_percent:.1f}%")
             is_critical = qc.assay_percent < 90 or qc.assay_percent > 110
 
         # Dissolution check (>80% at 30 min)
         if qc.dissolution_mean and qc.dissolution_mean < 80:
-            issues.append(f"Dissolution basse: {qc.dissolution_mean:.1f}%")
+            issues.append(f"Low dissolution: {qc.dissolution_mean:.1f}%")
             is_critical = is_critical or qc.dissolution_mean < 70
 
         # Content uniformity check (AV < 15)
         # Note: Only check if value is realistic (some data may have % instead of AV)
         if qc.cu_av and qc.cu_av > 15 and qc.cu_av < 50:  # AV should be < 50
-            issues.append(f"CU AV hors spec: {qc.cu_av:.1f}")
+            issues.append(f"CU AV out of spec: {qc.cu_av:.1f}")
             is_critical = is_critical or qc.cu_av > 25
 
         # Total impurities check (<0.5%)
         if qc.impurity_total and qc.impurity_total > 0.5:
-            issues.append(f"Impuretés élevées: {qc.impurity_total:.2f}%")
+            issues.append(f"High impurities: {qc.impurity_total:.2f}%")
             is_critical = is_critical or qc.impurity_total > 1.0
 
         if issues:

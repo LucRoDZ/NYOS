@@ -48,11 +48,11 @@ export default function Analytics() {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Vue d\'ensemble', icon: Layers },
+    { id: 'overview', label: 'Overview', icon: Layers },
     { id: 'production', label: 'Production', icon: Factory },
-    { id: 'suppliers', label: 'Fournisseurs', icon: Users },
-    { id: 'equipment', label: 'Équipements', icon: Factory },
-    { id: 'comparison', label: 'Comparaison', icon: TrendingUp },
+    { id: 'suppliers', label: 'Suppliers', icon: Users },
+    { id: 'equipment', label: 'Equipment', icon: Factory },
+    { id: 'comparison', label: 'Comparison', icon: TrendingUp },
   ];
 
   if (loading) {
@@ -60,7 +60,7 @@ export default function Analytics() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Chargement des analyses avancées...</p>
+          <p className="text-gray-500">Loading advanced analytics...</p>
         </div>
       </div>
     );
@@ -70,9 +70,9 @@ export default function Analytics() {
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
         <AlertTriangle className="mx-auto text-yellow-500 mb-4" size={56} />
-        <h3 className="font-semibold text-yellow-800 text-xl mb-2">Aucune donnée disponible</h3>
+        <h3 className="font-semibold text-yellow-800 text-xl mb-2">No data available</h3>
         <p className="text-yellow-600">
-          Importez des données pour accéder aux analyses avancées.
+          Import data to access advanced analytics.
         </p>
       </div>
     );
@@ -80,10 +80,10 @@ export default function Analytics() {
 
   // Prepare radar chart data
   const radarData = [
-    { metric: 'Rendement', value: overview?.production?.avg_yield || 0, fullMark: 100 },
+    { metric: 'Yield', value: overview?.production?.avg_yield || 0, fullMark: 100 },
     { metric: 'QC Pass', value: overview?.quality?.pass_rate || 0, fullMark: 100 },
     { metric: 'Calibrations OK', value: overview?.equipment?.calibration_pass_rate || 0, fullMark: 100 },
-    { metric: 'Score Qualité', value: overview?.quality?.quality_score || 0, fullMark: 100 },
+    { metric: 'Quality Score', value: overview?.quality?.quality_score || 0, fullMark: 100 },
   ];
 
   // Yearly evolution data
@@ -101,9 +101,9 @@ export default function Analytics() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Analyses Avancées</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Advanced Analytics</h2>
           <p className="text-sm text-gray-500">
-            Insights détaillés sur {overview?.period?.years} années de données
+            Detailed insights on {overview?.period?.years} years of data
           </p>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function Analytics() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Performance Radar */}
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Performance Globale</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Overall Performance</h3>
             <ResponsiveContainer width="100%" height={300}>
               <RadarChart data={radarData}>
                 <PolarGrid />
@@ -152,26 +152,26 @@ export default function Analytics() {
 
           {/* Key Metrics */}
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Métriques Clés</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Key Metrics</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Total lots analysés</span>
+                <span className="text-gray-600">Total batches analyzed</span>
                 <span className="text-xl font-bold">{overview?.production?.total_batches?.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Tests QC effectués</span>
+                <span className="text-gray-600">QC tests performed</span>
                 <span className="text-xl font-bold">{overview?.quality?.total_tests?.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">Total plaintes</span>
+                <span className="text-gray-600">Total complaints</span>
                 <span className="text-xl font-bold">{overview?.compliance?.total_complaints}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600">CAPAs traitées</span>
+                <span className="text-gray-600">CAPAs processed</span>
                 <span className="text-xl font-bold">{overview?.compliance?.total_capas}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="text-green-700">Score qualité global</span>
+                <span className="text-green-700">Overall quality score</span>
                 <span className="text-xl font-bold text-green-700">{overview?.quality?.quality_score}/100</span>
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function Analytics() {
           {/* Yearly Evolution */}
           {yearlyChartData.length > 0 && (
             <div className="bg-white rounded-xl p-6 border border-gray-200 lg:col-span-2">
-              <h3 className="font-semibold text-gray-900 mb-4">Évolution sur 6 ans</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">6-Year Evolution</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={yearlyChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -189,8 +189,8 @@ export default function Analytics() {
                   <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
                   <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
                   <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="batches" name="Lots" stroke="#2563eb" strokeWidth={2} />
-                  <Line yAxisId="right" type="monotone" dataKey="complaints" name="Plaintes" stroke="#ef4444" strokeWidth={2} />
+                  <Line yAxisId="left" type="monotone" dataKey="batches" name="Batches" stroke="#2563eb" strokeWidth={2} />
+                  <Line yAxisId="right" type="monotone" dataKey="complaints" name="Complaints" stroke="#ef4444" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -203,35 +203,35 @@ export default function Analytics() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Production totale</p>
+              <p className="text-sm text-gray-500 mb-1">Total production</p>
               <p className="text-3xl font-bold text-gray-900">{overview?.production?.total_batches?.toLocaleString()}</p>
-              <p className="text-sm text-gray-400 mt-1">lots sur {overview?.period?.years} ans</p>
+              <p className="text-sm text-gray-400 mt-1">batches over {overview?.period?.years} years</p>
             </div>
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Rendement moyen</p>
+              <p className="text-sm text-gray-500 mb-1">Average yield</p>
               <p className="text-3xl font-bold text-green-600">{overview?.production?.avg_yield}%</p>
               <p className="text-sm text-gray-400 mt-1">
                 Min: {overview?.production?.yield_range?.min}% | Max: {overview?.production?.yield_range?.max}%
               </p>
             </div>
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Production mensuelle</p>
+              <p className="text-sm text-gray-500 mb-1">Monthly production</p>
               <p className="text-3xl font-bold text-gray-900">{overview?.production?.recent_batches}</p>
-              <p className="text-sm text-gray-400 mt-1">lots ce mois</p>
+              <p className="text-sm text-gray-400 mt-1">batches this month</p>
             </div>
           </div>
 
           {/* Production by Year */}
           {yearlyChartData.length > 0 && (
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-4">Production par Année</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Production by Year</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={yearlyChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="year" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
                   <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                  <Bar dataKey="batches" name="Lots" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="batches" name="Batches" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -244,15 +244,15 @@ export default function Analytics() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Total fournisseurs</p>
+              <p className="text-sm text-gray-500 mb-1">Total suppliers</p>
               <p className="text-3xl font-bold text-gray-900">{suppliers?.total_suppliers}</p>
             </div>
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Fournisseurs à risque</p>
+              <p className="text-sm text-gray-500 mb-1">At-risk suppliers</p>
               <p className="text-3xl font-bold text-red-600">{suppliers?.at_risk}</p>
             </div>
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <p className="text-sm text-gray-500 mb-1">Taux d'approbation moyen</p>
+              <p className="text-sm text-gray-500 mb-1">Average approval rate</p>
               <p className="text-3xl font-bold text-green-600">
                 {suppliers?.suppliers?.length > 0
                   ? (suppliers.suppliers.reduce((acc, s) => acc + s.approval_rate, 0) / suppliers.suppliers.length).toFixed(1)
@@ -263,18 +263,18 @@ export default function Analytics() {
 
           {/* Supplier Table */}
           <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Performance par Fournisseur</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Performance by Supplier</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 font-medium text-gray-500">Fournisseur</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Livraisons</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Approuvés</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Rejetés</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Quarantaine</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Taux</th>
-                    <th className="text-center py-3 font-medium text-gray-500">Statut</th>
+                    <th className="text-left py-3 font-medium text-gray-500">Supplier</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Deliveries</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Approved</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Rejected</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Quarantine</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Rate</th>
+                    <th className="text-center py-3 font-medium text-gray-500">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -299,7 +299,7 @@ export default function Analytics() {
                           s.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-red-100 text-red-700'
                         }`}>
-                          {s.status === 'good' ? 'Conforme' : s.status === 'warning' ? 'À surveiller' : 'Critique'}
+                          {s.status === 'good' ? 'Compliant' : s.status === 'warning' ? 'Watch' : 'Critical'}
                         </span>
                       </td>
                     </tr>
@@ -312,7 +312,7 @@ export default function Analytics() {
           {/* Supplier Distribution Pie */}
           {supplierPieData.length > 0 && (
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-4">Répartition des Livraisons</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Delivery Distribution</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -344,33 +344,33 @@ export default function Analytics() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {equipment.lowest_yield && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                    <p className="text-sm text-yellow-700 mb-1">⚠️ Rendement le plus bas</p>
+                    <p className="text-sm text-yellow-700 mb-1">Warning: Lowest yield</p>
                     <p className="text-2xl font-bold text-yellow-800">{equipment.lowest_yield.equipment_id}</p>
                     <p className="text-sm text-yellow-600 mt-1">
-                      Rendement: {equipment.lowest_yield.avg_yield}% | {equipment.lowest_yield.batches} lots
+                      Yield: {equipment.lowest_yield.avg_yield}% | {equipment.lowest_yield.batches} batches
                     </p>
                   </div>
                 )}
                 {equipment.highest_variability && (
                   <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                    <p className="text-sm text-red-700 mb-1">⚠️ Variabilité la plus élevée</p>
+                    <p className="text-sm text-red-700 mb-1">Warning: Highest variability</p>
                     <p className="text-2xl font-bold text-red-800">{equipment.highest_variability.equipment_id}</p>
                     <p className="text-sm text-red-600 mt-1">
-                      Écart-type dureté: ±{equipment.highest_variability.hardness_variability} kp
+                      Hardness std dev: +/-{equipment.highest_variability.hardness_variability} kp
                     </p>
                   </div>
                 )}
               </div>
 
               <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-4">Performance par Équipement</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">Performance by Equipment</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={equipment.equipment}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="equipment_id" stroke="#6b7280" />
                     <YAxis domain={[90, 100]} stroke="#6b7280" />
                     <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                    <Bar dataKey="avg_yield" name="Rendement %" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="avg_yield" name="Yield %" fill="#22c55e" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -388,24 +388,24 @@ export default function Analytics() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">{comparison.period1?.label}</h3>
                 <span className="text-sm text-gray-500">
-                  {comparison.period1?.start} → {comparison.period1?.end}
+                  {comparison.period1?.start} - {comparison.period1?.end}
                 </span>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Lots produits</span>
+                  <span>Batches produced</span>
                   <span className="font-bold">{comparison.period1?.batches}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Rendement moyen</span>
+                  <span>Average yield</span>
                   <span className="font-bold text-green-600">{comparison.period1?.avg_yield}%</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Dureté moyenne</span>
+                  <span>Average hardness</span>
                   <span className="font-bold">{comparison.period1?.avg_hardness} kp</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Plaintes</span>
+                  <span>Complaints</span>
                   <span className="font-bold text-orange-600">{comparison.period1?.complaints}</span>
                 </div>
               </div>
@@ -416,24 +416,24 @@ export default function Analytics() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">{comparison.period2?.label}</h3>
                 <span className="text-sm text-gray-500">
-                  {comparison.period2?.start} → {comparison.period2?.end}
+                  {comparison.period2?.start} - {comparison.period2?.end}
                 </span>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Lots produits</span>
+                  <span>Batches produced</span>
                   <span className="font-bold">{comparison.period2?.batches}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Rendement moyen</span>
+                  <span>Average yield</span>
                   <span className="font-bold text-green-600">{comparison.period2?.avg_yield}%</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Dureté moyenne</span>
+                  <span>Average hardness</span>
                   <span className="font-bold">{comparison.period2?.avg_hardness} kp</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span>Plaintes</span>
+                  <span>Complaints</span>
                   <span className="font-bold text-orange-600">{comparison.period2?.complaints}</span>
                 </div>
               </div>
@@ -442,7 +442,7 @@ export default function Analytics() {
 
           {/* Changes Summary */}
           <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-6 border border-primary-200">
-            <h3 className="font-semibold text-primary-900 mb-4">Évolution</h3>
+            <h3 className="font-semibold text-primary-900 mb-4">Evolution</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <p className={`text-2xl font-bold ${comparison.changes?.batches_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -454,19 +454,19 @@ export default function Analytics() {
                 <p className={`text-2xl font-bold ${comparison.changes?.yield_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {comparison.changes?.yield_pct >= 0 ? '+' : ''}{comparison.changes?.yield_pct}%
                 </p>
-                <p className="text-sm text-gray-600">Rendement</p>
+                <p className="text-sm text-gray-600">Yield</p>
               </div>
               <div className="text-center">
                 <p className={`text-2xl font-bold ${comparison.changes?.hardness_pct >= 0 ? 'text-blue-600' : 'text-blue-600'}`}>
                   {comparison.changes?.hardness_pct >= 0 ? '+' : ''}{comparison.changes?.hardness_pct}%
                 </p>
-                <p className="text-sm text-gray-600">Dureté</p>
+                <p className="text-sm text-gray-600">Hardness</p>
               </div>
               <div className="text-center">
                 <p className={`text-2xl font-bold ${comparison.changes?.complaints_pct <= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {comparison.changes?.complaints_pct >= 0 ? '+' : ''}{comparison.changes?.complaints_pct}%
                 </p>
-                <p className="text-sm text-gray-600">Plaintes</p>
+                <p className="text-sm text-gray-600">Complaints</p>
               </div>
             </div>
           </div>

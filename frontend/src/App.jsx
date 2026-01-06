@@ -9,9 +9,9 @@ import Analytics from './components/Analytics';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: Activity },
-  { id: 'analytics', label: 'Analyses', icon: Layers },
-  { id: 'trends', label: 'Tendances', icon: BarChart3 },
-  { id: 'chat', label: 'Assistant IA', icon: MessageSquare },
+  { id: 'analytics', label: 'Analytics', icon: Layers },
+  { id: 'trends', label: 'Trends', icon: BarChart3 },
+  { id: 'chat', label: 'AI Assistant', icon: MessageSquare },
   { id: 'upload', label: 'Import Data', icon: Upload },
 ];
 

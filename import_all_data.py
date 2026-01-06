@@ -11,7 +11,6 @@ from pathlib import Path
 BASE_URL = "http://localhost:8000"
 APR_DATA_DIR = Path(__file__).parent / "apr_data"
 
-# Define all data files to import with their types
 DATA_FILES = {
     "manufacturing": {
         "folder": "manufacturing",
@@ -91,7 +90,7 @@ def import_file(filepath: Path, data_type: str) -> dict:
                 f"{BASE_URL}/data/upload",
                 files=files,
                 params={"data_type": data_type},
-                timeout=300,  # 5 minutes timeout for large files
+                timeout=300, 
             )
 
         if response.status_code == 200:
@@ -104,23 +103,19 @@ def import_file(filepath: Path, data_type: str) -> dict:
 
 def main():
     print("=" * 60)
-    print("🏭 NYOS - Automatic Data Importer")
-    print("=" * 60)
 
-    # Check backend
-    print("\n📡 Checking backend connection...")
+    print("\n Checking backend connection...")
     if not check_backend():
-        print("❌ Backend not responding at", BASE_URL)
+        print(" Backend not responding at", BASE_URL)
         print(
             "   Please start the backend first: cd backend && uvicorn app.main:app --reload"
         )
         return
-    print("✅ Backend is running")
+    print(" Backend is running")
 
-    # Check data directory
-    print(f"\n📁 Data directory: {APR_DATA_DIR}")
+    print(f"\n Data directory: {APR_DATA_DIR}")
     if not APR_DATA_DIR.exists():
-        print("❌ Data directory not found!")
+        print(" Data directory not found!")
         return
 
     total_imported = 0
@@ -129,12 +124,12 @@ def main():
     # Import each data type
     for name, config in DATA_FILES.items():
         print(f"\n{'─' * 50}")
-        print(f"📊 Importing {name.upper()}")
+        print(f" Importing {name.upper()}")
         print(f"{'─' * 50}")
 
         folder_path = APR_DATA_DIR / config["folder"]
         if not folder_path.exists():
-            print(f"   ⚠️  Folder not found: {folder_path}")
+            print(f"     Folder not found: {folder_path}")
             continue
 
         for year in config["years"]:
@@ -142,10 +137,10 @@ def main():
             filepath = folder_path / filename
 
             if not filepath.exists():
-                print(f"   ⚠️  {year}: File not found - {filename}")
+                print(f"   {year}: File not found - {filename}")
                 continue
 
-            print(f"   📥 {year}: Importing {filename}...", end=" ", flush=True)
+            print(f" {year}: Importing {filename}...", end=" ", flush=True)
             result = import_file(filepath, config["type"])
 
             if result["success"]:
@@ -153,28 +148,22 @@ def main():
                 print(f"✅ {count} records")
                 total_imported += count if isinstance(count, int) else 0
             else:
-                print(f"❌ Error: {result['error'][:50]}...")
+                print(f" Error: {result['error'][:50]}...")
                 total_errors += 1
 
-    # Summary
-    print("\n" + "=" * 60)
-    print("📋 IMPORT SUMMARY")
-    print("=" * 60)
-    print(f"   ✅ Total records imported: {total_imported:,}")
-    print(f"   ❌ Errors: {total_errors}")
 
     # Verify data
-    print("\n📊 Verifying imported data...")
+    print("\n Verifying imported data...")
     try:
         response = requests.get(f"{BASE_URL}/data/dashboard")
         if response.status_code == 200:
             data = response.json()
-            print(f"   📦 Total batches: {data.get('total_batches', 0):,}")
-            print(f"   📈 Average yield: {data.get('avg_yield', 0):.2f}%")
-            print(f"   📞 Open complaints: {data.get('complaints_open', 0)}")
-            print(f"   🔧 Open CAPAs: {data.get('capas_open', 0)}")
+            print(f"    Total batches: {data.get('total_batches', 0):,}")
+            print(f"    Average yield: {data.get('avg_yield', 0):.2f}%")
+            print(f"    Open complaints: {data.get('complaints_open', 0)}")
+            print(f"    Open CAPAs: {data.get('capas_open', 0)}")
     except Exception as e:
-        print(f"   ⚠️  Could not verify: {e}")
+        print(f"  Could not verify: {e}")
 
     print("\n✨ Import complete! You can now use the NYOS dashboard.")
     print("   Frontend: http://localhost:5173")

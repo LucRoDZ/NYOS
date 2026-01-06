@@ -10,20 +10,20 @@ import {
 import { api } from '../api';
 
 const parameters = [
-  { id: 'hardness', label: 'Dureté', unit: 'kp', min: 6, max: 20, target: 12, spec_min: 8, spec_max: 16 },
-  { id: 'yield_percent', label: 'Rendement', unit: '%', min: 90, max: 100, target: 98, spec_min: 95, spec_max: 100 },
-  { id: 'compression_force', label: 'Force Compression', unit: 'kN', min: 10, max: 30, target: 20, spec_min: 15, spec_max: 25 },
-  { id: 'weight', label: 'Poids', unit: 'mg', min: 480, max: 520, target: 500, spec_min: 490, spec_max: 510 },
-  { id: 'thickness', label: 'Épaisseur', unit: 'mm', min: 4, max: 6, target: 5, spec_min: 4.5, spec_max: 5.5 },
+  { id: 'hardness', label: 'Hardness', unit: 'kp', min: 6, max: 20, target: 12, spec_min: 8, spec_max: 16 },
+  { id: 'yield_percent', label: 'Yield', unit: '%', min: 90, max: 100, target: 98, spec_min: 95, spec_max: 100 },
+  { id: 'compression_force', label: 'Compression Force', unit: 'kN', min: 10, max: 30, target: 20, spec_min: 15, spec_max: 25 },
+  { id: 'weight', label: 'Weight', unit: 'mg', min: 480, max: 520, target: 500, spec_min: 490, spec_max: 510 },
+  { id: 'thickness', label: 'Thickness', unit: 'mm', min: 4, max: 6, target: 5, spec_min: 4.5, spec_max: 5.5 },
 ];
 
 const timeRanges = [
-  { value: 7, label: '7 jours' },
-  { value: 30, label: '30 jours' },
-  { value: 90, label: '3 mois' },
-  { value: 180, label: '6 mois' },
-  { value: 365, label: '1 an' },
-  { value: 730, label: '2 ans' },
+  { value: 7, label: '7 days' },
+  { value: 30, label: '30 days' },
+  { value: 90, label: '3 months' },
+  { value: 180, label: '6 months' },
+  { value: 365, label: '1 year' },
+  { value: 730, label: '2 years' },
 ];
 
 function StatBox({ label, value, unit, color = 'gray' }) {
@@ -128,8 +128,8 @@ export default function Trends() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Analyse des Tendances</h2>
-          <p className="text-sm text-gray-500">Suivi des paramètres critiques de production</p>
+          <h2 className="text-2xl font-bold text-gray-900">Trend Analysis</h2>
+          <p className="text-sm text-gray-500">Monitoring critical production parameters</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -139,7 +139,7 @@ export default function Trends() {
             }`}
           >
             <Layers size={18} />
-            Multi-paramètres
+            Multi-parameter
           </button>
           <button onClick={loadTrends} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
@@ -153,7 +153,7 @@ export default function Trends() {
           {/* Parameters */}
           <div className="flex-1">
             <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
-              <Filter size={12} /> Paramètres
+              <Filter size={12} /> Parameters
             </p>
             <div className="flex flex-wrap gap-2">
               {parameters.map(p => (
@@ -175,7 +175,7 @@ export default function Trends() {
           {/* Time Range */}
           <div>
             <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
-              <Calendar size={12} /> Période
+              <Calendar size={12} /> Period
             </p>
             <select
               value={days}
@@ -195,9 +195,9 @@ export default function Trends() {
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3">
           <AlertTriangle className="text-yellow-500 flex-shrink-0" size={24} />
           <div>
-            <p className="font-semibold text-yellow-800">Tendance significative détectée</p>
+            <p className="font-semibold text-yellow-800">Significant trend detected</p>
             <p className="text-yellow-600 text-sm">
-              {mainParam?.label} montre une tendance à la {mainData.trend_direction} sur cette période
+              {mainParam?.label} shows a {mainData.trend_direction === 'hausse' ? 'upward' : 'downward'} trend over this period
             </p>
           </div>
         </div>
@@ -208,21 +208,21 @@ export default function Trends() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-semibold text-gray-900">
-              {showMultiParam ? 'Comparaison Multi-paramètres' : mainParam?.label}
+              {showMultiParam ? 'Multi-parameter Comparison' : mainParam?.label}
             </h3>
             <p className="text-sm text-gray-500">
-              Derniers {days} jours
-              {mainData?.values?.length > 0 && ` • ${mainData.values.length} points de données`}
+              Last {days} days
+              {mainData?.values?.length > 0 && ` - ${mainData.values.length} data points`}
             </p>
           </div>
           
           {/* Stats */}
           {mainData && !mainData.error && (
             <div className="flex items-center gap-3">
-              <StatBox label="Moyenne" value={mainData.average} unit={mainParam?.unit} />
+              <StatBox label="Average" value={mainData.average} unit={mainParam?.unit} />
               <StatBox 
-                label="Tendance" 
-                value={mainData.trend_direction === 'hausse' ? '↑' : mainData.trend_direction === 'baisse' ? '↓' : '→'} 
+                label="Trend" 
+                value={mainData.trend_direction === 'hausse' ? '\u2191' : mainData.trend_direction === 'baisse' ? '\u2193' : '\u2192'} 
                 color={mainData.alert ? 'yellow' : 'green'}
               />
             </div>
@@ -238,14 +238,14 @@ export default function Trends() {
             <div className="text-center">
               <AlertTriangle size={48} className="mx-auto mb-3 text-yellow-500" />
               <p>{mainData.error}</p>
-              <p className="text-sm mt-2">Importez des données pour voir les tendances</p>
+              <p className="text-sm mt-2">Import data to view trends</p>
             </div>
           </div>
         ) : chartData.length === 0 ? (
           <div className="h-80 flex items-center justify-center text-gray-500">
             <div className="text-center">
               <BarChart3 size={48} className="mx-auto mb-3 text-gray-300" />
-              <p>Aucune donnée disponible</p>
+              <p>No data available</p>
             </div>
           </div>
         ) : (
@@ -295,7 +295,7 @@ export default function Trends() {
                   y={mainParam.target} 
                   stroke="#22c55e" 
                   strokeDasharray="3 3" 
-                  label={{ value: 'Cible', position: 'left', fill: '#22c55e', fontSize: 10 }}
+                  label={{ value: 'Target', position: 'left', fill: '#22c55e', fontSize: 10 }}
                 />
               )}
               
@@ -321,32 +321,32 @@ export default function Trends() {
       {comparison && !comparison.error && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Activity size={20} /> Comparaison de Périodes
+            <Activity size={20} /> Period Comparison
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Lots produits</p>
+              <p className="text-sm text-gray-500 mb-1">Batches produced</p>
               <p className="text-2xl font-bold">{comparison.period1?.batches}</p>
               <p className={`text-sm ${comparison.changes?.batches_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {comparison.changes?.batches_pct >= 0 ? '+' : ''}{comparison.changes?.batches_pct}% vs période précédente
+                {comparison.changes?.batches_pct >= 0 ? '+' : ''}{comparison.changes?.batches_pct}% vs previous period
               </p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Rendement moyen</p>
+              <p className="text-sm text-gray-500 mb-1">Average yield</p>
               <p className="text-2xl font-bold">{comparison.period1?.avg_yield}%</p>
               <p className={`text-sm ${comparison.changes?.yield_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {comparison.changes?.yield_pct >= 0 ? '+' : ''}{comparison.changes?.yield_pct}%
               </p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Dureté moyenne</p>
+              <p className="text-sm text-gray-500 mb-1">Average hardness</p>
               <p className="text-2xl font-bold">{comparison.period1?.avg_hardness} kp</p>
               <p className={`text-sm ${comparison.changes?.hardness_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {comparison.changes?.hardness_pct >= 0 ? '+' : ''}{comparison.changes?.hardness_pct}%
               </p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Plaintes</p>
+              <p className="text-sm text-gray-500 mb-1">Complaints</p>
               <p className="text-2xl font-bold">{comparison.period1?.complaints}</p>
               <p className={`text-sm ${comparison.changes?.complaints_pct <= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {comparison.changes?.complaints_pct >= 0 ? '+' : ''}{comparison.changes?.complaints_pct}%
@@ -360,17 +360,17 @@ export default function Trends() {
       {equipment?.equipment?.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Target size={20} /> Performance par Équipement
+            <Target size={20} /> Performance by Equipment
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-2 font-medium text-gray-500">Équipement</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Lots</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Rendement Moy.</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Dureté Moy.</th>
-                  <th className="text-center py-2 font-medium text-gray-500">Variabilité</th>
+                  <th className="text-left py-2 font-medium text-gray-500">Equipment</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Batches</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Avg. Yield</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Avg. Hardness</th>
+                  <th className="text-center py-2 font-medium text-gray-500">Variability</th>
                 </tr>
               </thead>
               <tbody>
@@ -386,7 +386,7 @@ export default function Trends() {
                     <td className="text-center py-2">{eq.avg_hardness} kp</td>
                     <td className="text-center py-2">
                       <span className={eq.hardness_variability > 10 ? 'text-red-600' : eq.hardness_variability > 5 ? 'text-yellow-600' : 'text-green-600'}>
-                        ±{eq.hardness_variability}
+                        +/-{eq.hardness_variability}
                       </span>
                     </td>
                   </tr>
@@ -398,7 +398,7 @@ export default function Trends() {
           {equipment.lowest_yield && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-700">
-                ⚠️ <strong>{equipment.lowest_yield.equipment_id}</strong> a le rendement le plus bas ({equipment.lowest_yield.avg_yield}%)
+                Warning: <strong>{equipment.lowest_yield.equipment_id}</strong> has the lowest yield ({equipment.lowest_yield.avg_yield}%)
               </p>
             </div>
           )}
@@ -407,19 +407,19 @@ export default function Trends() {
 
       {/* Legend */}
       <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Légende</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Legend</h4>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <span className="w-6 h-0.5 bg-green-500" style={{ borderStyle: 'dashed', height: '2px' }}></span>
-            Valeur cible
+            Target value
           </div>
           <div className="flex items-center gap-2">
             <span className="w-6 h-0.5 bg-red-500" style={{ borderStyle: 'dashed', height: '2px' }}></span>
-            Limites de spécification
+            Specification limits
           </div>
           <div className="flex items-center gap-2">
             <span className="w-6 h-0.5 bg-blue-600"></span>
-            Valeur mesurée
+            Measured value
           </div>
         </div>
       </div>
