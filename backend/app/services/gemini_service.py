@@ -1,6 +1,7 @@
 import google.generativeai as genai
 from app.config import GOOGLE_API_KEY
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app import models
 from datetime import datetime, timedelta
 import json
@@ -9,69 +10,127 @@ genai.configure(api_key=GOOGLE_API_KEY)
 
 
 def get_data_context(db: Session) -> str:
+    """Build comprehensive context from all data sources"""
     batches = (
         db.query(models.Batch)
         .order_by(models.Batch.manufacturing_date.desc())
-        .limit(100)
+        .limit(50)
         .all()
     )
     qc_results = (
         db.query(models.QCResult)
         .order_by(models.QCResult.test_date.desc())
-        .limit(100)
+        .limit(50)
         .all()
     )
     complaints = db.query(models.Complaint).all()
     capas = db.query(models.CAPA).all()
+    equipment = db.query(models.Equipment).limit(50).all()
+
+    # Calculate statistics
+    total_batches = db.query(models.Batch).count()
+    avg_yield = db.query(func.avg(models.Batch.yield_percent)).scalar() or 0
+    avg_hardness = db.query(func.avg(models.Batch.hardness)).scalar() or 0
 
     context = f"""
-Données de l'usine pharmaceutique - Paracetamol 500mg:
+=== DONNÉES DE L'USINE PHARMACEUTIQUE - PARACETAMOL 500mg ===
+Période analysée: 2020-2025 (6 ans de données APR)
 
-LOTS RÉCENTS ({len(batches)} lots):
+📊 STATISTIQUES GLOBALES:
+- Total lots produits: {total_batches:,}
+- Rendement moyen: {avg_yield:.1f}%
+- Dureté moyenne: {avg_hardness:.1f} kp
+- Plaintes clients: {len(complaints)} ({len([c for c in complaints if c.status == 'open'])} ouvertes)
+- CAPAs: {len(capas)} ({len([c for c in capas if c.status == 'open'])} ouvertes)
+
+📦 LOTS RÉCENTS (derniers {len(batches)}):
 """
-    for b in batches[:20]:
-        context += f"- {b.batch_id}: {b.manufacturing_date.strftime('%Y-%m-%d') if b.manufacturing_date else 'N/A'}, Machine: {b.machine}, Dureté: {b.hardness}N, Rendement: {b.yield_percent}%\n"
+    for b in batches[:15]:
+        date_str = (
+            b.manufacturing_date.strftime("%Y-%m-%d") if b.manufacturing_date else "N/A"
+        )
+        context += f"- {b.batch_id}: {date_str}, Press: {b.tablet_press_id or 'N/A'}, Dureté: {b.hardness or 0:.1f}kp, Rendement: {b.yield_percent or 0:.1f}%\n"
 
     if qc_results:
-        context += f"\nRÉSULTATS QC ({len(qc_results)} tests):\n"
-        for qc in qc_results[:20]:
-            context += f"- Lot {qc.batch_id}: Dissolution: {qc.dissolution}%, Essai: {qc.assay}%, Résultat: {qc.result}\n"
+        context += f"\n🔬 RÉSULTATS QC RÉCENTS ({len(qc_results)} tests):\n"
+        for qc in qc_results[:15]:
+            context += f"- {qc.batch_id}: Essai={qc.assay_percent or 0:.1f}%, Dissolution={qc.dissolution_mean or 0:.1f}%, Résultat: {qc.overall_result}\n"
 
     if complaints:
-        context += f"\nPLAINTES ({len(complaints)} total, {len([c for c in complaints if c.status == 'open'])} ouvertes):\n"
-        for c in complaints[:10]:
-            context += f"- {c.complaint_id}: {c.category} - {c.severity} - {c.description[:50]}...\n"
+        context += f"\n📞 PLAINTES CLIENTS ({len(complaints)} total):\n"
+        open_complaints = [
+            c for c in complaints if c.status and c.status.lower() == "open"
+        ]
+        context += f"   Ouvertes: {len(open_complaints)}\n"
+        by_category = {}
+        for c in complaints:
+            cat = c.category or "Autre"
+            by_category[cat] = by_category.get(cat, 0) + 1
+        for cat, count in sorted(by_category.items(), key=lambda x: -x[1])[:5]:
+            context += f"   - {cat}: {count}\n"
+        by_severity = {}
+        for c in complaints:
+            sev = c.severity or "Unknown"
+            by_severity[sev] = by_severity.get(sev, 0) + 1
+        context += f"   Par sévérité: {by_severity}\n"
 
     if capas:
-        context += f"\nCAPAs ({len(capas)} total, {len([c for c in capas if c.status == 'open'])} ouvertes):\n"
-        for capa in capas[:10]:
-            context += f"- {capa.capa_id}: {capa.type} - {capa.description[:50]}...\n"
+        context += f"\n🔧 CAPAS ({len(capas)} total):\n"
+        open_capas = [c for c in capas if c.status and "closed" not in c.status.lower()]
+        context += f"   Ouvertes: {len(open_capas)}\n"
+        by_source = {}
+        for c in capas:
+            src = c.source or "Autre"
+            by_source[src] = by_source.get(src, 0) + 1
+        for src, count in sorted(by_source.items(), key=lambda x: -x[1])[:5]:
+            context += f"   - Source {src}: {count}\n"
+        critical = [c for c in capas if c.risk_score == "Critical"]
+        context += f"   CAPAs critiques: {len(critical)}\n"
+
+    if equipment:
+        context += f"\n⚙️ ÉQUIPEMENTS (calibrations récentes):\n"
+        failures = [e for e in equipment if e.result == "Fail"]
+        context += f"   Échecs de calibration: {len(failures)}\n"
+        by_type = {}
+        for e in equipment:
+            t = e.equipment_type or "Autre"
+            by_type[t] = by_type.get(t, 0) + 1
+        context += f"   Par type: {by_type}\n"
 
     return context
 
 
 SYSTEM_PROMPT = """Tu es NYOS, un assistant IA expert en qualité pharmaceutique et analyse APR (Annual Product Review).
-Tu analyses les données de production de comprimés de Paracetamol 500mg.
+Tu analyses les données de production de comprimés de Paracetamol 500mg sur une période de 6 ans (2020-2025).
 
 Ton rôle:
-1. Détecter les tendances et dérives dans les données
-2. Identifier les anomalies et signaux faibles
-3. Résumer clairement la situation qualité
-4. Recommander des actions si nécessaire
+1. Détecter les tendances et dérives dans les données de production
+2. Identifier les anomalies, signaux faibles et problèmes potentiels
+3. Analyser les corrélations entre équipements, lots, et résultats qualité
+4. Résumer clairement la situation qualité de l'usine
+5. Recommander des actions correctives et préventives
+
+Scénarios cachés à détecter:
+- 2020: Impact COVID-19 sur production
+- 2021: Dégradation Press-A (Sept-Nov)
+- 2022: Problème fournisseur excipient MCC (Juin)
+- 2023: Transition méthode analytique (Q2)
+- 2024: Effet température saisonnière (Juil-Août)
+- 2025: Dérive Press-B + Nouveau fournisseur API (Nov)
 
 Règles:
-- Sois concis et précis
-- Utilise des données chiffrées quand possible
+- Sois précis avec des données chiffrées
 - Signale tout problème potentiel
 - Réponds en français
-- Formate tes réponses avec des bullet points si nécessaire
+- Utilise des bullet points et formatage markdown
+- Cite les lots, dates et valeurs spécifiques quand pertinent
 """
 
 
 async def chat_with_gemini(message: str, db: Session) -> str:
     try:
         context = get_data_context(db)
-        model = genai.GenerativeModel("gemini-3.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
 
         full_prompt = f"""{SYSTEM_PROMPT}
 
@@ -160,16 +219,34 @@ def get_full_stats(db: Session) -> dict:
     capas = db.query(models.CAPA).all()
     equipment = db.query(models.Equipment).all()
 
+    # Calculate QC pass rate based on actual pharmaceutical specifications
+    # Specs: Assay 95-105%, Dissolution >80%
+    qc_pass_count = len(
+        [
+            q
+            for q in qc_results
+            if q.assay_percent
+            and q.dissolution_mean
+            and 95 <= q.assay_percent <= 105
+            and q.dissolution_mean >= 80
+        ]
+    )
+
     stats = {
         "total_batches": len(batches),
         "avg_hardness": (
-            round(sum(b.hardness for b in batches if b.hardness) / len(batches), 2)
+            round(
+                sum(b.hardness for b in batches if b.hardness)
+                / max(len([b for b in batches if b.hardness]), 1),
+                2,
+            )
             if batches
             else 0
         ),
         "avg_yield": (
             round(
-                sum(b.yield_percent for b in batches if b.yield_percent) / len(batches),
+                sum(b.yield_percent for b in batches if b.yield_percent)
+                / max(len([b for b in batches if b.yield_percent]), 1),
                 2,
             )
             if batches
@@ -177,31 +254,29 @@ def get_full_stats(db: Session) -> dict:
         ),
         "machines": {},
         "qc_pass_rate": (
-            round(
-                len([q for q in qc_results if q.result == "pass"])
-                / len(qc_results)
-                * 100,
-                1,
-            )
-            if qc_results
-            else 0
+            round(qc_pass_count / max(len(qc_results), 1) * 100, 1) if qc_results else 0
         ),
         "complaints_by_category": {},
-        "complaints_open": len([c for c in complaints if c.status == "open"]),
-        "capas_open": len([c for c in capas if c.status == "open"]),
-        "equipment_due": len([e for e in equipment if e.status == "due"]),
+        "complaints_open": len(
+            [c for c in complaints if c.status and c.status.lower() == "open"]
+        ),
+        "capas_open": len(
+            [c for c in capas if c.status and "closed" not in c.status.lower()]
+        ),
+        "equipment_due": len([e for e in equipment if e.result == "Fail"]),
     }
 
     for b in batches:
-        if b.machine not in stats["machines"]:
-            stats["machines"][b.machine] = {
+        machine = b.tablet_press_id or "Unknown"
+        if machine not in stats["machines"]:
+            stats["machines"][machine] = {
                 "count": 0,
                 "hardness_sum": 0,
                 "yield_sum": 0,
             }
-        stats["machines"][b.machine]["count"] += 1
-        stats["machines"][b.machine]["hardness_sum"] += b.hardness or 0
-        stats["machines"][b.machine]["yield_sum"] += b.yield_percent or 0
+        stats["machines"][machine]["count"] += 1
+        stats["machines"][machine]["hardness_sum"] += b.hardness or 0
+        stats["machines"][machine]["yield_sum"] += b.yield_percent or 0
 
     for m, data in stats["machines"].items():
         if data["count"] > 0:
@@ -221,7 +296,7 @@ async def generate_summary_stream(db: Session):
     try:
         context = get_data_context(db)
         stats = get_full_stats(db)
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
 
         prompt = f"""{SYSTEM_PROMPT}
 

@@ -8,61 +8,68 @@ import pandas as pd
 import os
 from datetime import datetime
 
-OUTPUT_DIR = "/Users/ouzema/Albert School/NYOS/apr_data/"
+OUTPUT_DIR = (
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "apr_data") + os.sep
+)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def generate_data_summary():
     """Generate a comprehensive summary of all APR datasets."""
-    
+
     print("=" * 80)
     print("NYOS APR - COMPREHENSIVE DATA GENERATION SUMMARY")
     print("Product: Paracetamol 500mg Tablets (PARA-500-TAB)")
     print("Time Period: 2020-2025 (6 years)")
     print("=" * 80)
-    
+
     datasets = []
-    
+
     # List all CSV files
     files = sorted([f for f in os.listdir(OUTPUT_DIR) if f.endswith(".csv")])
-    
+
     total_records = 0
     total_columns = 0
-    
+
     print("\n📊 DATASET INVENTORY")
     print("-" * 80)
-    
+
     for f in files:
         filepath = os.path.join(OUTPUT_DIR, f)
         df = pd.read_csv(filepath)
         records = len(df)
         columns = len(df.columns)
         size_mb = os.path.getsize(filepath) / (1024 * 1024)
-        
+
         total_records += records
         total_columns += columns
-        
-        datasets.append({
-            "filename": f,
-            "records": records,
-            "columns": columns,
-            "size_mb": round(size_mb, 2)
-        })
-        
-        print(f"  {f:45} | {records:>8,} records | {columns:>3} cols | {size_mb:>6.2f} MB")
-    
+
+        datasets.append(
+            {
+                "filename": f,
+                "records": records,
+                "columns": columns,
+                "size_mb": round(size_mb, 2),
+            }
+        )
+
+        print(
+            f"  {f:45} | {records:>8,} records | {columns:>3} cols | {size_mb:>6.2f} MB"
+        )
+
     print("-" * 80)
     print(f"  {'TOTAL':45} | {total_records:>8,} records")
-    
+
     # Create summary dataframe
     summary_df = pd.DataFrame(datasets)
     summary_df.to_csv(f"{OUTPUT_DIR}_data_index.csv", index=False)
-    
+
     return summary_df
 
 
 def document_hidden_scenarios():
     """Document all hidden scenarios embedded in the data for AI detection."""
-    
+
     scenarios = [
         {
             "year": 2020,
@@ -72,34 +79,43 @@ def document_hidden_scenarios():
             "indicators": [
                 "Reduced batch count in Q2",
                 "Higher CPP variability",
-                "Extended manufacturing times"
+                "Extended manufacturing times",
             ],
-            "detection_difficulty": "Medium"
+            "detection_difficulty": "Medium",
         },
         {
             "year": 2021,
             "scenario": "Tablet Press-A Degradation",
             "description": "Press-A showing gradual degradation Sept-Nov 2021, manifesting as increased hardness variability",
-            "datasets_affected": ["manufacturing_extended", "qc_extended", "equipment_calibration"],
+            "datasets_affected": [
+                "manufacturing_extended",
+                "qc_extended",
+                "equipment_calibration",
+            ],
             "indicators": [
                 "Gradual increase in hardness values for Press-A batches",
                 "Higher compression force variability",
-                "Calibration failures on force parameters"
+                "Calibration failures on force parameters",
             ],
-            "detection_difficulty": "Medium-Hard"
+            "detection_difficulty": "Medium-Hard",
         },
         {
             "year": 2022,
             "scenario": "Excipient Supplier Quality Issue",
             "description": "MCC supplier (SUP-003) quality issues in June 2022 causing dissolution variability",
-            "datasets_affected": ["qc_extended", "raw_materials", "supplier_performance", "capa_records"],
+            "datasets_affected": [
+                "qc_extended",
+                "raw_materials",
+                "supplier_performance",
+                "capa_records",
+            ],
             "indicators": [
                 "Increased dissolution variability June-July",
                 "Higher rejection rate for MCC lots",
                 "Borderline COA results",
-                "Increased CAPA count"
+                "Increased CAPA count",
             ],
-            "detection_difficulty": "Medium"
+            "detection_difficulty": "Medium",
         },
         {
             "year": 2023,
@@ -109,9 +125,9 @@ def document_hidden_scenarios():
             "indicators": [
                 "Systematic assay increase April-June",
                 "Higher SST %RSD values",
-                "Return to normal in Q3"
+                "Return to normal in Q3",
             ],
-            "detection_difficulty": "Hard"
+            "detection_difficulty": "Hard",
         },
         {
             "year": 2024,
@@ -121,22 +137,27 @@ def document_hidden_scenarios():
             "indicators": [
                 "Higher drying endpoint temperatures",
                 "Environmental excursions in drying rooms",
-                "Potential moisture content variation"
+                "Potential moisture content variation",
             ],
-            "detection_difficulty": "Easy-Medium"
+            "detection_difficulty": "Easy-Medium",
         },
         {
             "year": 2025,
             "scenario": "Multiple Issues - Press-B Drift & API Supplier Change",
             "description": "Press-B showing drift Aug 1-15, 2025; New API supplier (SUP-008) introduced Nov 2025 with higher impurity profile",
-            "datasets_affected": ["manufacturing_extended", "qc_extended", "raw_materials", "supplier_performance"],
+            "datasets_affected": [
+                "manufacturing_extended",
+                "qc_extended",
+                "raw_materials",
+                "supplier_performance",
+            ],
             "indicators": [
                 "Press-B compression force drift",
                 "New supplier code appearing in November",
                 "Higher total impurity results",
-                "Lower assay results from new supplier"
+                "Lower assay results from new supplier",
             ],
-            "detection_difficulty": "Medium"
+            "detection_difficulty": "Medium",
         },
         {
             "year": "All Years",
@@ -146,41 +167,41 @@ def document_hidden_scenarios():
             "indicators": [
                 "Low yield batches without deviation reference",
                 "Released batches with yield <95%",
-                "Mismatch between yield issues and deviation count"
+                "Mismatch between yield issues and deviation count",
             ],
-            "detection_difficulty": "Medium"
-        }
+            "detection_difficulty": "Medium",
+        },
     ]
-    
+
     print("\n" + "=" * 80)
     print("🔍 HIDDEN SCENARIOS FOR AI DETECTION")
     print("=" * 80)
-    
+
     for s in scenarios:
         print(f"\n📌 {s['year']}: {s['scenario']}")
         print(f"   Description: {s['description']}")
         print(f"   Detection Difficulty: {s['detection_difficulty']}")
         print(f"   Datasets: {', '.join(s['datasets_affected'])}")
         print(f"   Key Indicators:")
-        for ind in s['indicators']:
+        for ind in s["indicators"]:
             print(f"      • {ind}")
-    
+
     # Save scenarios documentation
     scenarios_df = pd.DataFrame(scenarios)
     scenarios_df.to_csv(f"{OUTPUT_DIR}_hidden_scenarios.csv", index=False)
-    
+
     return scenarios_df
 
 
 def generate_apr_kpis():
     """Generate key APR metrics summary."""
-    
+
     print("\n" + "=" * 80)
     print("📈 KEY APR METRICS (2020-2025)")
     print("=" * 80)
-    
+
     metrics = []
-    
+
     for year in range(2020, 2026):
         # Load data for each year
         try:
@@ -189,46 +210,56 @@ def generate_apr_kpis():
             release_df = pd.read_csv(f"{OUTPUT_DIR}batch_release_{year}.csv")
             comp_df = pd.read_csv(f"{OUTPUT_DIR}customer_complaints_{year}.csv")
             capa_df = pd.read_csv(f"{OUTPUT_DIR}capa_records_{year}.csv")
-            
+
             # Calculate metrics
             batches = len(mfg_df)
             released = len(release_df[release_df["disposition"] == "Released"])
             rejected = len(release_df[release_df["disposition"] == "Rejected"])
             release_rate = round(released / batches * 100, 1)
-            
-            avg_yield = round(mfg_df["actual_yield_pct"].mean(), 1) if "actual_yield_pct" in mfg_df.columns else "N/A"
-            
+
+            avg_yield = (
+                round(mfg_df["actual_yield_pct"].mean(), 1)
+                if "actual_yield_pct" in mfg_df.columns
+                else "N/A"
+            )
+
             complaints = len(comp_df)
             critical_capas = len(capa_df[capa_df["risk_score"] == "Critical"])
-            
-            metrics.append({
-                "year": year,
-                "batches_manufactured": batches,
-                "batches_released": released,
-                "batches_rejected": rejected,
-                "release_rate_pct": release_rate,
-                "avg_yield_pct": avg_yield,
-                "complaints": complaints,
-                "critical_capas": critical_capas
-            })
-            
+
+            metrics.append(
+                {
+                    "year": year,
+                    "batches_manufactured": batches,
+                    "batches_released": released,
+                    "batches_rejected": rejected,
+                    "release_rate_pct": release_rate,
+                    "avg_yield_pct": avg_yield,
+                    "complaints": complaints,
+                    "critical_capas": critical_capas,
+                }
+            )
+
             print(f"\n{year}:")
-            print(f"   Batches: {batches:,} | Released: {released:,} ({release_rate}%) | Rejected: {rejected}")
-            print(f"   Avg Yield: {avg_yield}% | Complaints: {complaints} | Critical CAPAs: {critical_capas}")
-            
+            print(
+                f"   Batches: {batches:,} | Released: {released:,} ({release_rate}%) | Rejected: {rejected}"
+            )
+            print(
+                f"   Avg Yield: {avg_yield}% | Complaints: {complaints} | Critical CAPAs: {critical_capas}"
+            )
+
         except FileNotFoundError:
             print(f"\n{year}: Data files not found")
-    
+
     # Save metrics
     metrics_df = pd.DataFrame(metrics)
     metrics_df.to_csv(f"{OUTPUT_DIR}_apr_kpis.csv", index=False)
-    
+
     return metrics_df
 
 
 def create_readme():
     """Create README file for the dataset."""
-    
+
     readme = """# NYOS APR Synthetic Data - Paracetamol 500mg Tablets
 
 ## Overview
@@ -328,11 +359,13 @@ Generated: {date}
 
 ## Version
 v1.0 - Comprehensive APR Data Package
-""".format(date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    
+""".format(
+        date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+
     with open(f"{OUTPUT_DIR}README.md", "w") as f:
         f.write(readme)
-    
+
     print("\n✅ README.md created")
 
 
@@ -341,7 +374,7 @@ if __name__ == "__main__":
     scenarios = document_hidden_scenarios()
     kpis = generate_apr_kpis()
     create_readme()
-    
+
     print("\n" + "=" * 80)
     print("✅ NYOS APR DATA GENERATION COMPLETE!")
     print("=" * 80)

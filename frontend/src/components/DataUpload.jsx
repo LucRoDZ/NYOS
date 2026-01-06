@@ -3,11 +3,15 @@ import { Upload, FileText, CheckCircle, AlertCircle, Clock, Download } from 'luc
 import { api } from '../api';
 
 const dataTypes = [
-  { id: 'batch', label: 'Lots de production', description: 'Données de fabrication des lots' },
-  { id: 'qc', label: 'Résultats QC', description: 'Tests contrôle qualité' },
-  { id: 'complaint', label: 'Plaintes clients', description: 'Réclamations et retours' },
-  { id: 'capa', label: 'CAPAs', description: 'Actions correctives et préventives' },
-  { id: 'equipment', label: 'Équipements', description: 'Calibration et maintenance' },
+  { id: 'batch', label: 'Lots de production', description: 'manufacturing_extended_*.csv' },
+  { id: 'qc', label: 'Résultats QC', description: 'qc_lab_extended_*.csv' },
+  { id: 'complaint', label: 'Plaintes clients', description: 'customer_complaints_*.csv' },
+  { id: 'capa', label: 'CAPAs', description: 'capa_records_*.csv' },
+  { id: 'equipment', label: 'Équipements', description: 'equipment_calibration_*.csv' },
+  { id: 'environmental', label: 'Environnement', description: 'environmental_monitoring_*.csv' },
+  { id: 'stability', label: 'Stabilité', description: 'stability_data_*.csv' },
+  { id: 'raw_material', label: 'Matières premières', description: 'raw_materials_*.csv' },
+  { id: 'batch_release', label: 'Libération lots', description: 'batch_release_*.csv' },
 ];
 
 export default function DataUpload() {

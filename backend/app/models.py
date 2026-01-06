@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey, Enum
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+    Text,
+    ForeignKey,
+    Boolean,
+)
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -14,76 +23,240 @@ class DataType(str, enum.Enum):
     ENVIRONMENTAL = "environmental"
     RAW_MATERIAL = "raw_material"
     STABILITY = "stability"
+    BATCH_RELEASE = "batch_release"
 
 
 class Batch(Base):
+    """Extended manufacturing batch records with full CPPs"""
+
     __tablename__ = "batches"
     id = Column(Integer, primary_key=True, index=True)
     batch_id = Column(String(50), unique=True, index=True)
     product_name = Column(String(100))
+    product_code = Column(String(50))
+    batch_size_kg = Column(Float)
     manufacturing_date = Column(DateTime)
-    machine = Column(String(50))
-    operator = Column(String(50))
+    shift = Column(String(20))
+    operator_primary = Column(String(50))
+    operator_secondary = Column(String(50))
+    # Equipment
+    tablet_press_id = Column(String(50))
+    granulator_id = Column(String(50))
+    dryer_id = Column(String(50))
+    blender_id = Column(String(50))
+    # Process parameters
     compression_force = Column(Float)
+    pre_compression_force = Column(Float)
+    turret_speed = Column(Float)
     hardness = Column(Float)
     weight = Column(Float)
     thickness = Column(Float)
+    friability = Column(Float)
+    # Granulation
+    granulation_temp = Column(Float)
+    drying_temp_inlet = Column(Float)
+    drying_temp_outlet = Column(Float)
+    moisture_content = Column(Float)
+    # Yield
     yield_percent = Column(Float)
+    tablets_theoretical = Column(Integer)
+    tablets_actual = Column(Integer)
+    # Status
     status = Column(String(20), default="released")
+    deviation_id = Column(String(50))
+    comments = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class QCResult(Base):
+    """Extended QC lab results with full CQAs"""
+
     __tablename__ = "qc_results"
     id = Column(Integer, primary_key=True, index=True)
-    batch_id = Column(String(50), ForeignKey("batches.batch_id"), index=True)
+    batch_id = Column(String(50), index=True)
+    sample_id = Column(String(50))
     test_date = Column(DateTime)
-    dissolution = Column(Float)
-    assay = Column(Float)
+    # Identification
+    id_result = Column(String(20))
+    # Assay
+    assay_percent = Column(Float)
+    assay_result = Column(String(20))
+    # Dissolution
+    dissolution_mean = Column(Float)
+    dissolution_min = Column(Float)
+    dissolution_result = Column(String(20))
+    # Content Uniformity
+    cu_av = Column(Float)
+    cu_result = Column(String(20))
+    # Impurities
+    impurity_a = Column(Float)
+    impurity_total = Column(Float)
+    impurity_result = Column(String(20))
+    # Physical
     hardness = Column(Float)
     friability = Column(Float)
     disintegration = Column(Float)
-    uniformity = Column(Float)
-    result = Column(String(20))
+    weight_mean = Column(Float)
+    # Microbial
+    tamc = Column(Integer)
+    tymc = Column(Integer)
+    microbial_result = Column(String(20))
+    # Overall
+    overall_result = Column(String(20))
+    analyst = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class Complaint(Base):
+    """Customer complaints with investigation tracking"""
+
     __tablename__ = "complaints"
     id = Column(Integer, primary_key=True, index=True)
     complaint_id = Column(String(50), unique=True, index=True)
-    date = Column(DateTime)
+    complaint_date = Column(DateTime)
     batch_id = Column(String(50))
     category = Column(String(50))
-    severity = Column(String(20))
     description = Column(Text)
+    severity = Column(String(20))
+    market = Column(String(50))
+    reporter_type = Column(String(50))
+    investigation_required = Column(String(10))
+    root_cause = Column(Text)
+    investigation_outcome = Column(Text)
+    regulatory_reportable = Column(String(10))
+    capa_reference = Column(String(50))
     status = Column(String(20), default="open")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class CAPA(Base):
+    """CAPA records with full tracking"""
+
     __tablename__ = "capas"
     id = Column(Integer, primary_key=True, index=True)
     capa_id = Column(String(50), unique=True, index=True)
-    date = Column(DateTime)
-    type = Column(String(20))
+    capa_type = Column(String(30))
     source = Column(String(50))
-    description = Column(Text)
-    root_cause = Column(Text)
+    source_reference = Column(String(50))
+    open_date = Column(DateTime)
+    problem_statement = Column(Text)
+    problem_category = Column(String(50))
+    risk_score = Column(String(20))
+    rca_method = Column(String(50))
+    root_cause_category = Column(String(100))
+    root_cause_description = Column(Text)
+    responsible_department = Column(String(50))
+    capa_owner = Column(String(50))
+    target_date = Column(DateTime)
+    actual_completion_date = Column(DateTime)
+    days_to_close = Column(Integer)
     status = Column(String(20), default="open")
+    effectiveness_verified = Column(String(10))
+    num_actions = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class Equipment(Base):
+    """Equipment calibration records"""
+
     __tablename__ = "equipment"
     id = Column(Integer, primary_key=True, index=True)
+    calibration_id = Column(String(50), index=True)
     equipment_id = Column(String(50), index=True)
-    name = Column(String(100))
-    calibration_date = Column(DateTime)
-    next_calibration = Column(DateTime)
-    status = Column(String(20))
+    equipment_name = Column(String(100))
+    equipment_type = Column(String(50))
+    location = Column(String(50))
+    criticality = Column(String(20))
     parameter = Column(String(50))
+    scheduled_date = Column(DateTime)
+    actual_date = Column(DateTime)
+    next_due_date = Column(DateTime)
+    as_found_value = Column(Float)
+    as_left_value = Column(Float)
     deviation = Column(Float)
+    result = Column(String(20))
+    out_of_tolerance = Column(String(10))
+    calibrated_by = Column(String(50))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Environmental(Base):
+    """Environmental monitoring records"""
+
+    __tablename__ = "environmental"
+    id = Column(Integer, primary_key=True, index=True)
+    record_id = Column(String(50), index=True)
+    monitoring_date = Column(DateTime)
+    room_code = Column(String(20))
+    room_name = Column(String(100))
+    room_classification = Column(String(20))
+    sampling_point = Column(String(20))
+    particles_05um = Column(Integer)
+    particles_50um = Column(Integer)
+    viable_active_air = Column(Integer)
+    temperature = Column(Float)
+    humidity = Column(Float)
+    diff_pressure = Column(Float)
+    overall_result = Column(String(20))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class RawMaterial(Base):
+    """Raw material receipts"""
+
+    __tablename__ = "raw_materials"
+    id = Column(Integer, primary_key=True, index=True)
+    grn_number = Column(String(50), index=True)
+    material_code = Column(String(50))
+    material_name = Column(String(100))
+    supplier_id = Column(String(50))
+    supplier_name = Column(String(100))
+    receipt_date = Column(DateTime)
+    quantity = Column(Float)
+    unit = Column(String(20))
+    coa_received = Column(String(10))
+    test_status = Column(String(20))
+    disposition = Column(String(20))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Stability(Base):
+    """Stability testing data"""
+
+    __tablename__ = "stability"
+    id = Column(Integer, primary_key=True, index=True)
+    study_id = Column(String(50), index=True)
+    batch_id = Column(String(50))
+    stability_condition = Column(String(30))
+    storage_temp = Column(Integer)
+    storage_rh = Column(Integer)
+    timepoint_months = Column(Integer)
+    test_date = Column(DateTime)
+    assay_percent = Column(Float)
+    dissolution_percent = Column(Float)
+    impurity_total = Column(Float)
+    water_content = Column(Float)
+    overall_result = Column(String(20))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class BatchRelease(Base):
+    """Batch release decisions"""
+
+    __tablename__ = "batch_releases"
+    id = Column(Integer, primary_key=True, index=True)
+    batch_id = Column(String(50), index=True)
+    qp_id = Column(String(20))
+    qp_name = Column(String(100))
+    review_start_date = Column(DateTime)
+    qc_complete_date = Column(DateTime)
+    release_date = Column(DateTime)
+    disposition = Column(String(20))
+    days_to_release = Column(Integer)
+    has_deviation = Column(String(10))
+    has_oos = Column(String(10))
+    market_destination = Column(String(50))
+    yield_percent = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

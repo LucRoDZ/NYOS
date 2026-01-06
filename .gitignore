@@ -36,3 +36,5 @@ wheels/
 node_modules/
 
 .vite/
+
+apr_data/

@@ -1,11 +1,52 @@
 const API_BASE = 'http://localhost:8000';
 
 export const api = {
+  // Dashboard & Analytics
   async getDashboard() {
     const res = await fetch(`${API_BASE}/data/dashboard`);
     return res.json();
   },
 
+  async getAnalyticsOverview() {
+    const res = await fetch(`${API_BASE}/analytics/overview`);
+    return res.json();
+  },
+
+  async getDriftDetection(windowDays = 90) {
+    const res = await fetch(`${API_BASE}/analytics/drift-detection?window_days=${windowDays}`);
+    return res.json();
+  },
+
+  async getSupplierPerformance() {
+    const res = await fetch(`${API_BASE}/analytics/supplier-performance`);
+    return res.json();
+  },
+
+  async getPeriodComparison(p1Start, p1End, p2Start, p2End) {
+    let url = `${API_BASE}/analytics/period-comparison`;
+    if (p1Start) {
+      url += `?period1_start=${p1Start}&period1_end=${p1End}&period2_start=${p2Start}&period2_end=${p2End}`;
+    }
+    const res = await fetch(url);
+    return res.json();
+  },
+
+  async getAnomalies(days = 30) {
+    const res = await fetch(`${API_BASE}/analytics/anomalies?days=${days}`);
+    return res.json();
+  },
+
+  async getYearlySummary() {
+    const res = await fetch(`${API_BASE}/analytics/yearly-summary`);
+    return res.json();
+  },
+
+  async getEquipmentAnalysis() {
+    const res = await fetch(`${API_BASE}/analytics/equipment-analysis`);
+    return res.json();
+  },
+
+  // Data
   async getBatches(limit = 50) {
     const res = await fetch(`${API_BASE}/data/batches?limit=${limit}`);
     return res.json();
@@ -28,6 +69,7 @@ export const api = {
     return res.json();
   },
 
+  // Chat
   async getConversations() {
     const res = await fetch(`${API_BASE}/chat/conversations`);
     return res.json();

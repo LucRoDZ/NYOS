@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import engine, Base
-from app.routers import chat, data
+from app.routers import chat, data, analytics
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="NYOS APR",
-    description="Pharmaceutical Quality Analysis Assistant",
-    version="1.0.0",
+    description="Pharmaceutical Quality Analysis Assistant - Advanced Analytics",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -21,11 +21,12 @@ app.add_middleware(
 
 app.include_router(chat.router)
 app.include_router(data.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")
 async def root():
-    return {"status": "NYOS APR API Running", "version": "1.0.0"}
+    return {"status": "NYOS APR API Running", "version": "1.2.0"}
 
 
 @app.get("/health")
