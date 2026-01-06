@@ -54,6 +54,7 @@ cd backend
 pip install -r requirements.txt
 
 # Remember to create a .env file with your API key and the database URL: 
+#Just copy past this: 
 GOOGLE_API_KEY="KEY"
 DATABASE_URL=sqlite:///./nyos.db
 
@@ -72,6 +73,7 @@ python3 import_all_data.py
 
 ### 5. Frontend Setup
 
+With the backend server running, the database populated, open a **new terminal window**
 Set up and run the React development server.
 
 ```bash
