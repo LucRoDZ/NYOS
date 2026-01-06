@@ -54,6 +54,7 @@ cd backend
 pip install -r requirements.txt
 
 # Remember to create a .env file with your API key and the database URL: 
+GOOGLE_API_KEY="KEY"
 DATABASE_URL=sqlite:///./nyos.db
 
 # When dependencies are installed: 
