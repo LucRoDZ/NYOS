@@ -34,3 +34,5 @@ wheels/
 *.db
 
 node_modules/
+
+.vite/
